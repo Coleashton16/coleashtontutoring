@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ashton Nursing Mentor | ADN Specialist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+        
+        :root {
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            overscroll-behavior-y: contain;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .brand-font { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        /* Navigation Styles */
+        .bottom-nav-item.active { color: #4f46e5; }
+        .bottom-nav-item.active i { transform: translateY(-4px); }
+
+        /* Calendar & Scheduling */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .cal-day-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; border-radius: 12px; transition: all 0.2s; }
+        .cal-day-btn.selected { background: #4f46e5 !important; color: white !important; }
+        
+        .time-slot { font-size: 13px; font-weight: 700; padding: 14px; border-radius: 16px; text-align: center; border: 1px solid #e2e8f0; }
+        .time-slot.selected { background-color: #4f46e5; color: white; border-color: #4f46e5; }
+        .disabled { opacity: 0.3; cursor: not-allowed; background-color: #f3f4f6; color: #94a3b8 !important; }
+
+        /* Animation */
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Chat Styles */
+        .chat-bubble-user { background: #4f46e5; color: white; align-self: flex-end; border-radius: 18px 18px 0 18px; }
+        .chat-bubble-admin { background: #f1f5f9; color: #1e293b; align-self: flex-start; border-radius: 18px 18px 18px 0; }
+        
+        .loader { border: 2px solid #f3f3f3; border-top: 2px solid #4f46e5; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        ::-webkit-scrollbar { width: 0px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+    <!-- Top Header -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="bg-indigo-600 p-1.5 rounded-lg shadow-sm">
+                <i data-lucide="stethoscope" class="text-white w-4 h-4"></i>
+            </div>
+            <span class="brand-font font-bold text-sm tracking-tight">Ashton <span class="text-indigo-600">Mentor</span></span>
+        </div>
+        <div id="userProfile" class="flex items-center gap-3">
+            <button id="loginNavBtn" onclick="toggleAuthOverlay()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest">Sign In</button>
+            <div id="userInfo" class="hidden flex items-center gap-3">
+                <span id="userNameDisplay" class="text-[10px] font-black uppercase text-slate-400"></span>
+                <button onclick="handleSignOut()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-red-500">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Flow -->
+    <main id="mainScrollArea" class="flex-1 overflow-y-auto pb-24">
+        
+        <!-- Section: Home -->
+        <section id="section-home" class="admin-section p-6 space-y-8 slide-up">
+            <div class="text-center py-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1 mb-4 text-[10px] font-black text-indigo-700 bg-indigo-50 rounded-full border border-indigo-100 uppercase tracking-widest">ADN Mentorship</div>
+                <h1 class="text-4xl font-extrabold text-slate-900 mb-4 leading-tight brand-font">Excel in Nursing with <span class="text-indigo-600">Cole Ashton</span></h1>
+                <p class="text-sm text-slate-500 leading-relaxed mb-8">Personalized 1-on-1 coaching to bridge the gap between classroom and clinic.</p>
+                <div class="flex gap-3 justify-center">
+                    <button onclick="showSection('schedule')" class="flex-1 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-xl shadow-indigo-100 active:scale-95 transition">Book Session</button>
+                    <button onclick="showSection('courses')" class="flex-1 py-4 bg-white border border-slate-200 font-bold rounded-2xl active:scale-95 transition">View Subjects</button>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
+                <div class="relative z-10">
+                    <h3 class="text-xl font-bold brand-font mb-2">Ready for the NCLEX?</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Join 500+ nursing students who improved their assessment scores by 30% through direct clinical review.</p>
+                </div>
+                <i data-lucide="award" class="absolute -right-4 -bottom-4 w-24 h-24 text-white/10 rotate-12"></i>
+            </div>
+        </section>
+
+        <!-- Section: Courses -->
+        <section id="section-courses" class="admin-section hidden p-6 space-y-6 slide-up">
+            <h2 class="text-xl font-black brand-font text-slate-900 uppercase tracking-tight">Core Subjects</h2>
+            <div class="grid gap-4" id="courseList">
+                <div class="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm flex items-start gap-4">
+                    <div class="bg-indigo-50 p-3 rounded-2xl text-indigo-600"><i data-lucide="book-open" class="w-5 h-5"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-900">Introduction to Nursing</h3>
+                        <p class="text-xs text-slate-500 mt-1">Foundational concepts and professional standards.</p>
+                    </div>
+                </div>
+                <div class="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm flex items-start gap-4">
+                    <div class="bg-green-50 p-3 rounded-2xl text-green-600"><i data-lucide="activity" class="w-5 h-5"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-900">Health Assessment</h3>
+                        <p class="text-xs text-slate-500 mt-1">Examination techniques and clinical data interpretation.</p>
+                    </div>
+                </div>
+                <div class="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm flex items-start gap-4">
+                    <div class="bg-amber-50 p-3 rounded-2xl text-amber-600"><i data-lucide="pill" class="w-5 h-5"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-900">Pharmacology</h3>
+                        <p class="text-xs text-slate-500 mt-1">Classifications and safe dosage calculations.</p>
+                    </div>
+                </div>
+                <div class="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm flex items-start gap-4">
+                    <div class="bg-red-50 p-3 rounded-2xl text-red-600"><i data-lucide="heart-pulse" class="w-5 h-5"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-900">Adult Health I & II</h3>
+                        <p class="text-xs text-slate-500 mt-1">Med-Surg management for complex patient care.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Schedule -->
+        <section id="section-schedule" class="admin-section hidden p-6 space-y-6 slide-up relative">
+            <div id="bookingLock" class="absolute inset-0 bg-slate-50/90 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-8 text-center">
+                <div class="w-16 h-16 bg-white rounded-[2rem] flex items-center justify-center shadow-xl mb-6 text-indigo-600">
+                    <i data-lucide="lock" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-xl font-bold brand-font mb-4">Portal Access Required</h3>
+                <button onclick="toggleAuthOverlay()" class="px-8 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg">Sign In to Schedule</button>
+            </div>
+
+            <div id="step-1" class="space-y-6">
+                <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 id="monthDisplay" class="font-bold text-slate-900 brand-font"></h3>
+                        <div class="flex gap-1">
+                            <button onclick="changeMonth(-1)" class="p-2"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                            <button onclick="changeMonth(1)" class="p-2"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid mb-2 text-[10px] font-black text-slate-300 text-center uppercase tracking-widest">
+                        <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                    </div>
+                    <div id="calendarDays" class="calendar-grid"></div>
+                </div>
+
+                <div id="timeSelection" class="hidden space-y-4">
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Available Times</h3>
+                    <div id="timeSlots" class="grid grid-cols-2 gap-3"></div>
+                    <button onclick="nextStep()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-xl mt-4">Continue to Details</button>
+                </div>
+            </div>
+
+            <div id="step-2" class="hidden space-y-6">
+                <button onclick="prevStep()" class="flex items-center gap-2 text-indigo-600 font-bold text-sm">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Adjust Time
+                </button>
+                <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="text" id="bookingFirstName" placeholder="First Name" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm outline-none focus:ring-1 focus:ring-indigo-500">
+                        <input type="text" id="bookingLastName" placeholder="Last Name" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm outline-none focus:ring-1 focus:ring-indigo-500">
+                    </div>
+                    <select id="bookingCourse" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm outline-none">
+                        <option>Introduction to Nursing</option>
+                        <option>Health Assessment</option>
+                        <option>Adult Health I</option>
+                        <option>Adult Health II</option>
+                        <option>Pharmacology</option>
+                        <option>Mental Health</option>
+                        <option>Maternal Newborn Health</option>
+                    </select>
+                    <textarea id="bookingTopics" rows="3" placeholder="Specific topics to cover..." class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm outline-none" oninput="saveBookingData()"></textarea>
+                    <button id="finalBookBtn" onclick="handleBooking()" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-xl">
+                        <span>Request Session</span>
+                        <div id="bookingLoader" class="loader hidden"></div>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Portal (Dashboard) -->
+        <section id="section-portal" class="admin-section hidden p-6 space-y-6 slide-up">
+            <h2 class="text-xl font-black brand-font text-slate-900 uppercase tracking-tight">My Sessions</h2>
+            <div id="studentAppointmentsList" class="space-y-3"></div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-3 flex justify-between items-center z-[100] pb-[calc(12px+env(safe-area-inset-bottom))]">
+        <button onclick="showSection('home')" class="bottom-nav-item flex flex-col items-center gap-1 text-slate-400 transition-all duration-300" data-nav="home">
+            <i data-lucide="home" class="w-6 h-6"></i>
+            <span class="text-[9px] font-bold uppercase tracking-wider">Home</span>
+        </button>
+        <button onclick="showSection('courses')" class="bottom-nav-item flex flex-col items-center gap-1 text-slate-400 transition-all duration-300" data-nav="courses">
+            <i data-lucide="book-open" class="w-6 h-6"></i>
+            <span class="text-[9px] font-bold uppercase tracking-wider">Courses</span>
+        </button>
+        <button onclick="showSection('schedule')" class="bottom-nav-item flex flex-col items-center gap-1 text-slate-400 transition-all duration-300" data-nav="schedule">
+            <i data-lucide="calendar" class="w-6 h-6"></i>
+            <span class="text-[9px] font-bold uppercase tracking-wider">Book</span>
+        </button>
+        <button onclick="showSection('portal')" class="bottom-nav-item flex flex-col items-center gap-1 text-slate-400 transition-all duration-300" data-nav="portal">
+            <i data-lucide="layout-grid" class="w-6 h-6"></i>
+            <span class="text-[9px] font-bold uppercase tracking-wider">Portal</span>
+        </button>
+    </nav>
+
+    <!-- Chat Widget Integration -->
+    <div id="chatContainer" class="fixed bottom-24 right-6 z-[100] hidden">
+        <div id="chatWindow" class="hidden bg-white w-[85vw] h-[60vh] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden mb-4 border border-slate-100 animate-in slide-in-from-bottom-4">
+            <div class="bg-indigo-600 p-5 text-white flex justify-between items-center font-bold text-sm">
+                <span>Chat with Cole</span>
+                <button onclick="toggleChatWindow()"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 text-xs bg-slate-50"></div>
+            <div class="p-4 bg-white border-t flex gap-2">
+                <input type="text" id="chatInput" placeholder="Ask a question..." class="flex-1 bg-slate-50 outline-none p-3 rounded-xl text-sm">
+                <button onclick="sendChatMessage()" class="bg-indigo-600 text-white p-3 rounded-xl"><i data-lucide="send" class="w-5 h-5"></i></button>
+            </div>
+        </div>
+        <button onclick="toggleChatWindow()" class="bg-indigo-600 text-white w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center relative active:scale-95 transition">
+            <i data-lucide="message-circle" class="w-6 h-6"></i>
+            <div id="chatBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white rounded-full hidden flex items-center justify-center animate-pulse"><span class="text-[8px] font-black">!</span></div>
+        </button>
+    </div>
+
+    <!-- Auth Modal (Mobile Centered) -->
+    <div id="authOverlay" class="fixed inset-0 z-[1000] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center hidden p-6">
+        <div class="bg-white p-8 rounded-[2.5rem] max-w-sm w-full text-center shadow-2xl space-y-6">
+            <h3 class="text-2xl font-extrabold brand-font">Student Sign In</h3>
+            <div class="space-y-4">
+                <button onclick="handleGoogleSignIn()" class="w-full py-4 border border-slate-200 rounded-2xl font-bold flex items-center justify-center gap-3 active:bg-slate-50 transition">
+                    <i data-lucide="mail" class="w-5 h-5 text-red-500"></i> Google
+                </button>
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-slate-100"></div>
+                    <span class="flex-shrink mx-4 text-xs font-bold text-slate-300 uppercase tracking-widest">or</span>
+                    <div class="flex-grow border-t border-slate-100"></div>
+                </div>
+                <input type="email" id="authEmail" placeholder="Email" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm outline-none">
+                <input type="password" id="authPassword" placeholder="Password" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm outline-none">
+                <button onclick="handleEmailAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg">Enter Portal</button>
+                <button onclick="toggleAuthOverlay()" class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyDRLarhK20JltsckgrZRVJBDt4A4FTkUSk", authDomain: "coleashtontut.firebaseapp.com", projectId: "coleashtontut", storageBucket: "coleashtontut.firebasestorage.app", messagingSenderId: "277509432126", appId: "1:277509432126:web:08c3221cbf3d1336a3c26f" };
+        const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), appId = "coleashtontut";
+
+        let currentUser = null, selectedDate = null, selectedTime = null, currentViewMonth = new Date().getMonth(), currentViewYear = new Date().getFullYear();
+        let adminSettings = { weeklySchedule: {}, blackoutDates: [], specificDateSlots: {} }, userSessions = [], chatMessagesLocal = [];
+
+        // Logic Preservation: SPA Routing
+        window.showSection = (id) => {
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`section-${id}`).classList.remove('hidden');
+            document.querySelectorAll('.bottom-nav-item').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.nav === id);
+            });
+            document.getElementById('mainScrollArea').scrollTop = 0;
+        };
+
+        // Firebase Listeners
+        onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), (docSnap) => {
+            if (docSnap.exists()) { adminSettings = docSnap.data(); generateCalendar(); if (selectedDate) renderTimeSlots(); }
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user; const isLogged = !!user;
+            document.getElementById('loginNavBtn').classList.toggle('hidden', isLogged);
+            document.getElementById('userInfo').classList.toggle('hidden', !isLogged);
+            document.getElementById('bookingLock').classList.toggle('hidden', isLogged);
+            document.getElementById('chatContainer').classList.toggle('hidden', !isLogged);
+            if (isLogged) {
+                document.getElementById('authOverlay').classList.add('hidden');
+                document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
+                initUserData();
+            }
+        });
+
+        function initUserData() {
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'bookings'), (snapshot) => {
+                userSessions = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).filter(s => s.studentUid === currentUser.uid);
+                renderUserSessions();
+            });
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'chats', currentUser.uid), (docSnap) => {
+                if (docSnap.exists()) {
+                    chatMessagesLocal = docSnap.data().messages || [];
+                    renderChatMessages(chatMessagesLocal);
+                    const lastMsg = chatMessagesLocal[chatMessagesLocal.length - 1];
+                    if (lastMsg?.sender === 'admin' && document.getElementById('chatWindow').classList.contains('hidden')) {
+                        document.getElementById('chatBadge').classList.remove('hidden');
+                    }
+                }
+            });
+        }
+
+        // Logic Preservation: Calendar & Scheduling
+        window.generateCalendar = () => {
+            const calendarDays = document.getElementById('calendarDays'); calendarDays.innerHTML = '';
+            document.getElementById('monthDisplay').innerText = `${new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(currentViewYear, currentViewMonth))} ${currentViewYear}`;
+            const firstDay = new Date(currentViewYear, currentViewMonth, 1).getDay(), daysInMonth = new Date(currentViewYear, currentViewMonth + 1, 0).getDate(), today = new Date(); today.setHours(0,0,0,0);
+            for (let i = 0; i < firstDay; i++) calendarDays.appendChild(document.createElement('div'));
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dStr = `${currentViewYear}-${String(currentViewMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`, dayOfWeek = new Date(currentViewYear, currentViewMonth, i).getDay();
+                const isBlackout = adminSettings.blackoutDates?.includes(dStr), dayOverride = adminSettings.specificDateSlots?.[dStr], dayWeekly = adminSettings.weeklySchedule?.[dayOfWeek];
+                const slotsAvailable = dayOverride ? (dayOverride.slots || []).length : (dayWeekly?.disabled ? 0 : (dayWeekly?.slots || []).length);
+                const btn = document.createElement('button'); btn.innerText = i; btn.className = "cal-day-btn hover:bg-indigo-50 active:scale-90";
+                if (isBlackout || slotsAvailable === 0 || new Date(currentViewYear, currentViewMonth, i) < today) btn.className += " text-slate-200 pointer-events-none";
+                else {
+                    if (selectedDate === dStr) btn.classList.add('selected');
+                    btn.onclick = () => { selectedDate = dStr; generateCalendar(); renderTimeSlots(); };
+                }
+                calendarDays.appendChild(btn);
+            }
+        };
+
+        window.renderTimeSlots = () => {
+            const container = document.getElementById('timeSlots'); container.innerHTML = ''; document.getElementById('timeSelection').classList.remove('hidden');
+            const dayOfWeek = new Date(selectedDate + "T12:00:00").getDay(), override = adminSettings.specificDateSlots?.[selectedDate], slots = override ? (override.slots || []) : (adminSettings.weeklySchedule?.[dayOfWeek]?.slots || []);
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'bookings'), (snap) => {
+                const all = snap.docs.map(d => d.data()); container.innerHTML = '';
+                slots.forEach(t => {
+                    const isTaken = all.some(b => b.scheduledDate === selectedDate && b.scheduledTime === t && b.status !== 'cancelled');
+                    const btn = document.createElement('button'); btn.innerText = t; btn.className = `time-slot ${isTaken ? 'disabled' : 'bg-white shadow-sm'} ${selectedTime === t ? 'selected' : ''}`;
+                    if (!isTaken) btn.onclick = () => { selectedTime = t; renderTimeSlots(); };
+                    container.appendChild(btn);
+                });
+            });
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        window.handleBooking = async () => {
+            const fName = document.getElementById('bookingFirstName').value, lName = document.getElementById('bookingLastName').value;
+            if (!fName || !lName || !selectedTime) return alert("Please provide your name and select a time.");
+            document.getElementById('finalBookBtn').disabled = true; document.getElementById('bookingLoader').classList.remove('hidden');
+            try { 
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'bookings'), { 
+                    studentUid: currentUser.uid, 
+                    studentEmail: currentUser.email, 
+                    studentFirstName: fName, 
+                    studentLastName: lName, 
+                    course: document.getElementById('bookingCourse').value, 
+                    topics: document.getElementById('bookingTopics').value, 
+                    scheduledDate: selectedDate, 
+                    scheduledTime: selectedTime, 
+                    timestamp: serverTimestamp(), 
+                    status: 'requested' 
+                }); 
+                showSection('portal');
+                alert("Session Requested Successfully!");
+                location.reload(); 
+            }
+            catch (e) { alert("Booking failed. Please try again."); document.getElementById('finalBookBtn').disabled = false; }
+        };
+
+        // Logic Preservation: User Portal & Chat
+        function renderUserSessions() {
+            const list = document.getElementById('studentAppointmentsList');
+            if (userSessions.length === 0) { list.innerHTML = '<div class="p-12 text-center text-slate-400 italic bg-white rounded-[2rem] border border-dashed">No scheduled sessions yet.</div>'; return; }
+            list.innerHTML = '';
+            userSessions.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)).forEach(session => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-5 rounded-[2rem] border border-slate-100 flex justify-between items-center shadow-sm";
+                const styles = { requested: 'bg-amber-50 text-amber-600', confirmed: 'bg-green-50 text-green-600', cancelled: 'bg-red-50 text-red-600', completed: 'bg-indigo-50 text-indigo-700' };
+                div.innerHTML = `
+                    <div class="space-y-1">
+                        <p class="font-bold text-slate-900 text-sm">${session.scheduledDate} @ ${session.scheduledTime}</p>
+                        <p class="text-[10px] font-black uppercase text-indigo-500 tracking-wider">${session.course}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-tighter ${styles[session.status] || 'bg-slate-100'}">${session.status}</span>
+                        ${session.status === 'completed' ? `<button onclick="showInvoice('${session.id}')" class="p-2 bg-indigo-600 text-white rounded-xl"><i data-lucide="receipt" class="w-4 h-4"></i></button>` : ''}
+                    </div>`;
+                list.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        window.showInvoice = (id) => {
+            const s = userSessions.find(x => x.id === id);
+            const modal = document.createElement('div');
+            modal.className = "fixed inset-0 bg-slate-900/80 z-[2000] flex items-end p-0";
+            modal.innerHTML = `
+                <div class="bg-white w-full rounded-t-[3rem] p-8 space-y-6 slide-up shadow-2xl">
+                    <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-4"></div>
+                    <div class="flex justify-between items-start">
+                        <div><h3 class="text-2xl font-black uppercase brand-font">Receipt</h3><p class="text-xs text-slate-400">ADN Mentorship - Ashton Nursing</p></div>
+                        <div class="text-right"><p class="text-3xl font-black text-indigo-600">$${(s.totalBilled || 0).toFixed(2)}</p></div>
+                    </div>
+                    <div class="space-y-4 py-4 border-y border-slate-50">
+                        <div class="flex justify-between text-xs"><span class="text-slate-400 font-bold uppercase">Subject</span><span class="font-black">${s.course}</span></div>
+                        <div class="flex justify-between text-xs"><span class="text-slate-400 font-bold uppercase">Hours</span><span class="font-black">${s.hours || 0}</span></div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-2xl">
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Clinical Notes</p>
+                        <p class="text-xs text-slate-600 leading-relaxed italic border-l-2 border-indigo-200 pl-3">${s.tutorComments || 'Mentorship review of clinical theory.'}</p>
+                    </div>
+                    <button onclick="this.closest('.fixed').remove()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-xl">Dismiss</button>
+                </div>`;
+            document.body.appendChild(modal);
+        };
+
+        window.toggleChatWindow = () => {
+            document.getElementById('chatWindow').classList.toggle('hidden');
+            if (!document.getElementById('chatWindow').classList.contains('hidden')) document.getElementById('chatBadge').classList.add('hidden');
+        };
+
+        window.sendChatMessage = async () => {
+            const input = document.getElementById('chatInput'), msg = input.value.trim();
+            if (!msg || !currentUser) return;
+            const chatRef = doc(db, 'artifacts', appId, 'public', 'data', 'chats', currentUser.uid);
+            await setDoc(chatRef, { studentName: currentUser.displayName || currentUser.email.split('@')[0], lastUpdated: serverTimestamp(), messages: [...chatMessagesLocal, { sender: 'student', text: msg, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) }] }, { merge: true });
+            input.value = '';
+        }
+
+        function renderChatMessages(messages) {
+            const container = document.getElementById('chatMessages'); container.innerHTML = '';
+            messages.forEach(m => {
+                const div = document.createElement('div'); div.className = `p-4 max-w-[85%] text-xs font-bold ${m.sender === 'student' ? 'chat-bubble-user' : 'chat-bubble-admin shadow-sm border border-slate-100'}`;
+                div.innerHTML = `<p>${m.text}</p><span class="block text-[8px] opacity-60 mt-1 text-right">${m.time}</span>`;
+                container.appendChild(div);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Navigation Helpers
+        window.changeMonth = (dir) => { currentViewMonth += dir; if(currentViewMonth>11){currentViewMonth=0;currentViewYear++} if(currentViewMonth<0){currentViewMonth=11;currentViewYear--} generateCalendar(); };
+        window.nextStep = () => { if(selectedDate && selectedTime){ document.getElementById('step-1').classList.add('hidden'); document.getElementById('step-2').classList.remove('hidden'); } };
+        window.prevStep = () => { document.getElementById('step-2').classList.add('hidden'); document.getElementById('step-1').classList.remove('hidden'); };
+        window.toggleAuthOverlay = () => document.getElementById('authOverlay').classList.toggle('hidden');
+        window.handleGoogleSignIn = () => signInWithPopup(auth, new GoogleAuthProvider()).then(() => document.getElementById('authOverlay').classList.add('hidden'));
+        window.handleEmailAuth = async () => {
+            const e = document.getElementById('authEmail').value, p = document.getElementById('authPassword').value; if (!e || !p) return;
+            try { await signInWithEmailAndPassword(auth, e, p); } catch (err) { if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') await createUserWithEmailAndPassword(auth, e, p); else alert(err.message); }
+        };
+        window.handleSignOut = () => signOut(auth).then(() => location.reload());
+
+        lucide.createIcons();
+        generateCalendar();
+        showSection('home');
+    </script>
+</body>
+</html>
