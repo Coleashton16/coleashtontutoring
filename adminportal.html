@@ -15,7 +15,7 @@
         th, td { border-bottom: 1px solid #f1f5f9; padding: 14px; text-align: left; }
         th { background-color: #f8fafc; font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; font-weight: 700; }
         
-        /* Layout for the Big Master Calendar */
+        /* Master Calendar */
         .master-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background-color: #e2e8f0; border: 1px solid #e2e8f0; }
         .master-day-header { background-color: #f8fafc; padding: 12px; text-align: center; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em; }
         .master-day-cell { background-color: white; min-height: 150px; padding: 8px; position: relative; transition: all 0.2s; }
@@ -34,8 +34,9 @@
         .day-box { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; position: relative; }
         .day-box.blackout { background-color: #fee2e2; color: #ef4444; border-color: #fecaca; text-decoration: line-through; }
         .day-box.has-override { border-color: #4f46e5; color: #4f46e5; background-color: #eef2ff; }
-        .day-box.selected { background-color: #4f46e5 !important; color: white !important; border-color: #4f46e5; z-index: 10; shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .day-box.selected { background-color: #4f46e5 !important; color: white !important; border-color: #4f46e5; z-index: 10; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
+        /* Chat Items */
         .chat-sidebar-item.active { background-color: #f1f5f9; border-left: 4px solid #4f46e5; }
         .msg-admin { background: #4f46e5; color: white; align-self: flex-end; border-radius: 12px 12px 0 12px; }
         .msg-student { background: #f1f5f9; color: #1e293b; align-self: flex-start; border-radius: 12px 12px 12px 0; }
@@ -43,9 +44,18 @@
         .modal-backdrop { background-color: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* Notification Styling */
+        #notificationPanel { transform: translateX(120%); transition: transform 0.3s ease; }
+        #notificationPanel.open { transform: translateX(0); }
+        .toast-notify { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Student Profile Styling */
+        .student-item.active { background-color: #f8fafc; border-left: 4px solid #4f46e5; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col overflow-x-hidden">
 
     <!-- Login Section -->
     <div id="loginSection" class="fixed inset-0 z-[1000] bg-slate-50 flex items-center justify-center p-6">
@@ -71,22 +81,32 @@
                 <div class="bg-indigo-600 p-1.5 rounded-lg"><i data-lucide="layout-dashboard" class="text-white w-4 h-4"></i></div>
                 <h1 class="font-black brand-font tracking-tight text-lg uppercase">Tutor Command</h1>
             </div>
-            <div class="flex items-center gap-8">
-                <nav class="hidden md:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    <button onclick="showSection('overview')" class="hover:text-white transition">Overview</button>
-                    <button onclick="showSection('master')" class="hover:text-white transition">Master Schedule</button>
-                    <button onclick="showSection('appointments')" class="hover:text-white transition">Appointments</button>
-                    <button onclick="showSection('availability')" class="hover:text-white transition">Availability Rules</button>
-                    <button onclick="showSection('inbox')" class="hover:text-white transition relative">
-                        Inbox <span id="globalInboxBadge" class="absolute -top-2 -right-2 w-2 h-2 bg-red-500 rounded-full hidden animate-pulse"></span>
+            <div class="flex items-center gap-6">
+                <nav class="hidden lg:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <button onclick="showSection('overview')" class="nav-btn-link hover:text-white transition">Overview</button>
+                    <button onclick="showSection('master')" class="nav-btn-link hover:text-white transition">Master Schedule</button>
+                    <button onclick="showSection('students')" class="nav-btn-link hover:text-white transition">Students</button>
+                    <button onclick="showSection('appointments')" class="nav-btn-link hover:text-white transition relative">
+                        Appointments <span id="navBadgeAppointments" class="absolute -top-1 -right-2 w-1.5 h-1.5 bg-red-500 rounded-full hidden"></span>
+                    </button>
+                    <button onclick="showSection('availability')" class="nav-btn-link hover:text-white transition">Availability Rules</button>
+                    <button onclick="showSection('inbox')" class="nav-btn-link hover:text-white transition relative">
+                        Inbox <span id="navBadgeInbox" class="absolute -top-1 -right-2 w-1.5 h-1.5 bg-red-500 rounded-full hidden"></span>
                     </button>
                 </nav>
-                <button onclick="logout()" class="text-red-400 text-[10px] font-black uppercase border border-red-400/30 px-3 py-1.5 rounded-lg hover:bg-red-400 hover:text-white transition">Log Out</button>
+                <div class="h-8 w-px bg-slate-800"></div>
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleNotificationPanel()" class="relative p-2 text-slate-400 hover:text-white transition">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span id="globalBellBadge" class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 border-2 border-slate-900 rounded-full hidden"></span>
+                    </button>
+                    <button onclick="logout()" class="text-red-400 text-[10px] font-black uppercase border border-red-400/30 px-3 py-1.5 rounded-lg hover:bg-red-400 hover:text-white transition">Log Out</button>
+                </div>
             </div>
         </nav>
 
         <!-- Dynamic Content -->
-        <main class="flex-1 p-6 md:p-10 max-w-full mx-auto w-full">
+        <main class="flex-1 p-6 md:p-10 max-w-full mx-auto w-full relative">
             
             <!-- SECTION: Overview -->
             <section id="section-overview" class="admin-section space-y-8 max-w-7xl mx-auto">
@@ -108,12 +128,21 @@
                         <p id="statActiveChats" class="text-4xl font-black brand-font text-green-600">0</p>
                     </div>
                 </div>
+
+                <!-- Live Feed Header -->
+                <div class="bg-indigo-900 rounded-[2.5rem] p-8 text-white flex justify-between items-center shadow-xl">
+                    <div>
+                        <h2 class="text-2xl font-black brand-font">Welcome back, Cole</h2>
+                        <p class="text-indigo-300 text-sm font-medium">You have <span id="overviewPendingCount" class="font-bold text-white">0</span> pending requests to review.</p>
+                    </div>
+                    <button onclick="showSection('appointments')" class="bg-white text-indigo-900 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition">Review Bookings</button>
+                </div>
             </section>
 
             <!-- SECTION: Master Schedule (Big Calendar) -->
             <section id="section-master" class="admin-section hidden">
                 <div class="bg-white rounded-[3rem] shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-white sticky left-0">
+                    <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-white">
                         <div>
                             <h2 class="text-2xl font-black brand-font text-slate-900">Master Schedule</h2>
                             <p class="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] mt-1">Full Month Attendance & Openings</p>
@@ -125,9 +154,9 @@
                                 <div class="flex items-center gap-1.5"><div class="w-2 h-2 bg-red-400 rounded-full"></div> Blacked Out</div>
                             </div>
                             <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-2xl">
-                                <button onclick="changeMasterCal(-1)" class="p-2 hover:bg-white rounded-xl transition shadow-sm"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                                <button onclick="changeMasterCal(-1)" class="p-2 hover:bg-white rounded-xl transition shadow-sm"><i data-lucide="chevron-left" class="w-4 h-4 text-slate-600"></i></button>
                                 <h3 id="masterCalMonth" class="font-black text-sm text-slate-900 min-w-[140px] text-center uppercase tracking-widest"></h3>
-                                <button onclick="changeMasterCal(1)" class="p-2 hover:bg-white rounded-xl transition shadow-sm"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                                <button onclick="changeMasterCal(1)" class="p-2 hover:bg-white rounded-xl transition shadow-sm"><i data-lucide="chevron-right" class="w-4 h-4 text-slate-600"></i></button>
                             </div>
                         </div>
                     </div>
@@ -140,8 +169,54 @@
                         <div class="master-day-header">Fri</div>
                         <div class="master-day-header">Sat</div>
                     </div>
-                    <div id="masterCalGrid" class="master-calendar-grid">
-                        <!-- Generated JS -->
+                    <div id="masterCalGrid" class="master-calendar-grid"></div>
+                </div>
+            </section>
+
+            <!-- SECTION: Student Profiles -->
+            <section id="section-students" class="admin-section hidden h-[75vh] bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden flex max-w-7xl mx-auto">
+                <div class="w-1/3 border-r border-slate-100 flex flex-col">
+                    <div class="p-6 border-b border-slate-100 font-black brand-font uppercase text-[10px] tracking-widest text-slate-900">Student Directory</div>
+                    <div id="studentSidebar" class="flex-1 overflow-y-auto">
+                        <!-- Student list -->
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col bg-slate-50/50 overflow-y-auto">
+                    <div id="studentDetailArea" class="p-8 space-y-8 hidden">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h2 id="profileStudentName" class="text-3xl font-black brand-font text-slate-900">Student Name</h2>
+                                <p id="profileStudentEmail" class="text-indigo-500 font-bold text-sm">email@student.com</p>
+                            </div>
+                            <div class="bg-white px-4 py-2 rounded-2xl shadow-sm border border-slate-100">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Sessions</p>
+                                <p id="profileSessionCount" class="text-xl font-black text-slate-900">0</p>
+                            </div>
+                        </div>
+
+                        <!-- Private Notes Area -->
+                        <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i data-lucide="lock" class="w-4 h-4 text-amber-500"></i>
+                                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Tutor's Private Log (Only You See This)</h3>
+                            </div>
+                            <textarea id="privateTutorNotes" rows="6" placeholder="Document progress, clinical weaknesses, concepts to revisit..." class="w-full p-6 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition text-sm leading-relaxed" onchange="savePrivateStudentNote()"></textarea>
+                            <div class="mt-4 flex justify-end">
+                                <p class="text-[9px] font-bold text-slate-300 uppercase italic">Changes save automatically on exit</p>
+                            </div>
+                        </div>
+
+                        <!-- History Area -->
+                        <div class="space-y-4">
+                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Session Attendance History</h3>
+                            <div id="profileAttendanceHistory" class="space-y-2">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <div id="studentEmptyState" class="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                        <div class="w-16 h-16 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-4"><i data-lucide="user"></i></div>
+                        <p class="text-slate-400 italic">Select a student from the directory to manage their profile and private notes.</p>
                     </div>
                 </div>
             </section>
@@ -183,7 +258,7 @@
                             </div>
                         </div>
                         <div class="space-y-6">
-                            <div class="flex flex-wrap gap-2" id="overrideSlotsContainer"></div>
+                            <div id="overrideSlotsContainer" class="flex flex-wrap gap-2"></div>
                             <div class="flex gap-4">
                                 <div class="flex-1 flex bg-white/10 rounded-2xl border border-white/20 overflow-hidden focus-within:ring-2 focus-within:ring-white/40 transition">
                                     <input type="text" id="overrideInput" placeholder="Add time (e.g. 10am or 14:00)" class="flex-1 p-4 bg-transparent outline-none text-sm placeholder:text-indigo-400" onkeydown="if(event.key==='Enter') addOverrideSlot()">
@@ -224,7 +299,7 @@
                     </div>
                     <div id="adminChatMessages" class="flex-1 overflow-y-auto p-8 flex flex-col gap-4"></div>
                     <div id="chatInputArea" class="p-6 bg-white border-t border-slate-100 flex gap-4 hidden">
-                        <input type="text" id="adminChatInput" placeholder="Type reply..." class="flex-1 p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" onkeydown="if(event.key === 'Enter') sendAdminMessage()">
+                        <input type="text" id="adminChatInput" placeholder="Type clinical feedback or session follow-up..." class="flex-1 p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" onkeydown="if(event.key === 'Enter') sendAdminMessage()">
                         <button onclick="sendAdminMessage()" class="bg-indigo-600 text-white px-8 rounded-2xl font-bold hover:bg-indigo-700 transition shadow-lg">SEND</button>
                     </div>
                 </div>
@@ -232,7 +307,21 @@
         </main>
     </div>
 
-    <!-- Finalize Modal -->
+    <!-- Notification Side Panel -->
+    <div id="notificationPanel" class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-[500] flex flex-col border-l border-slate-100">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white">
+            <h3 class="text-lg font-black brand-font uppercase tracking-widest">Alert Center</h3>
+            <button onclick="toggleNotificationPanel()" class="p-2 hover:bg-slate-800 rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div id="notificationList" class="flex-1 overflow-y-auto p-4 space-y-3">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[1000] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Completion Modal -->
     <div id="invoiceModal" class="fixed inset-0 z-[500] modal-backdrop flex items-center justify-center p-4 hidden">
         <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
             <div class="bg-green-600 p-8 text-white">
@@ -270,6 +359,13 @@
         let masterCalMonth = new Date().getMonth(), masterCalYear = new Date().getFullYear();
         let globalHourlyRate = 50;
 
+        // New Profile State
+        let activeProfileStudentUid = null;
+        let studentProfiles = {}; // Private notes mapped by UID
+
+        let lastBookingCount = null;
+        let lastMessageCount = {};
+
         lucide.createIcons();
 
         function formatTimeInput(input) {
@@ -284,6 +380,8 @@
             document.querySelectorAll('.admin-section').forEach(s => s.classList.add('hidden')); 
             document.getElementById(`section-${id}`).classList.remove('hidden'); 
             if (id === 'master') renderMasterCalendar();
+            if (id === 'students') renderStudentSidebar();
+            closeNotificationPanel();
         };
 
         window.login = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } catch (err) { alert("Invalid credentials."); } };
@@ -306,22 +404,185 @@
             });
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'billing'), (snap) => { if (snap.exists()) { globalHourlyRate = snap.data().hourlyRate || 50; document.getElementById('hourlyRateInput').value = globalHourlyRate; } });
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'bookings')), (snap) => { 
-                currentBookings = snap.docs.map(d => ({ id: d.id, ...d.data() })); 
+                const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                
+                if (lastBookingCount !== null && data.length > lastBookingCount) {
+                    const newReq = data.find(b => b.status === 'requested' && !currentBookings.find(ob => ob.id === b.id));
+                    if (newReq) showToast(`New Request: ${newReq.studentFirstName} booked ${newReq.scheduledDate}`);
+                }
+                lastBookingCount = data.length;
+
+                currentBookings = data; 
                 renderBookingsTable(); 
+                renderNotificationList();
+                if (document.getElementById('section-students').classList.contains('hidden') === false) renderStudentSidebar();
                 document.getElementById('statTotalBookings').innerText = currentBookings.length; 
                 renderMasterCalendar(); 
             });
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'chats')), (snap) => { 
-                currentChats = snap.docs.map(d => ({ uid: d.id, ...d.data() })); 
+                const data = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+                data.forEach(chat => {
+                    const msgCount = chat.messages?.length || 0;
+                    if (lastMessageCount[chat.uid] !== undefined && msgCount > lastMessageCount[chat.uid]) {
+                        const lastMsg = chat.messages[chat.messages.length - 1];
+                        if (lastMsg.sender === 'student') showToast(`Message: ${chat.studentName} sent a reply.`);
+                    }
+                    lastMessageCount[chat.uid] = msgCount;
+                });
+                currentChats = data; 
                 renderChatSidebar(); 
+                renderNotificationList();
                 if (activeChatUid) renderAdminChat(); 
                 document.getElementById('statActiveChats').innerText = currentChats.length; 
             });
+
+            // Sync private student log
+            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'studentProfiles')), (snap) => {
+                studentProfiles = {};
+                snap.docs.forEach(doc => {
+                    studentProfiles[doc.id] = doc.data();
+                });
+                if (activeProfileStudentUid) loadStudentProfileDetail(activeProfileStudentUid);
+            });
         }
+
+        // --- Student Profile Logic ---
+        function renderStudentSidebar() {
+            const container = document.getElementById('studentSidebar');
+            container.innerHTML = '';
+
+            // Aggregate unique students from bookings
+            const studentsMap = {};
+            currentBookings.forEach(b => {
+                if (!studentsMap[b.studentUid]) {
+                    studentsMap[b.studentUid] = {
+                        uid: b.studentUid,
+                        firstName: b.studentFirstName,
+                        lastName: b.studentLastName || '',
+                        email: b.studentEmail,
+                        totalSessions: 0
+                    };
+                }
+                studentsMap[b.studentUid].totalSessions++;
+            });
+
+            const uniqueStudents = Object.values(studentsMap).sort((a,b) => a.firstName.localeCompare(b.firstName));
+
+            uniqueStudents.forEach(student => {
+                const item = document.createElement('div');
+                item.className = `student-item p-6 border-b border-slate-50 cursor-pointer hover:bg-slate-50 transition ${activeProfileStudentUid === student.uid ? 'active' : ''}`;
+                item.onclick = () => {
+                    activeProfileStudentUid = student.uid;
+                    renderStudentSidebar();
+                    loadStudentProfileDetail(student.uid);
+                };
+                item.innerHTML = `
+                    <p class="font-bold text-sm text-slate-900">${student.firstName} ${student.lastName}</p>
+                    <p class="text-[10px] text-slate-400 truncate">${student.email}</p>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function loadStudentProfileDetail(uid) {
+            const studentBookings = currentBookings.filter(b => b.studentUid === uid);
+            const firstBooking = studentBookings[0];
+            if (!firstBooking) return;
+
+            document.getElementById('studentEmptyState').classList.add('hidden');
+            document.getElementById('studentDetailArea').classList.remove('hidden');
+
+            document.getElementById('profileStudentName').innerText = `${firstBooking.studentFirstName} ${firstBooking.studentLastName || ''}`;
+            document.getElementById('profileStudentEmail').innerText = firstBooking.studentEmail;
+            document.getElementById('profileSessionCount').innerText = studentBookings.length;
+
+            // Load private notes
+            const notesArea = document.getElementById('privateTutorNotes');
+            notesArea.value = studentProfiles[uid]?.tutorNotes || '';
+
+            // Render attendance history
+            const historyCont = document.getElementById('profileAttendanceHistory');
+            historyCont.innerHTML = '';
+            
+            studentBookings.sort((a,b) => new Date(b.scheduledDate) - new Date(a.scheduledDate)).forEach(s => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center";
+                div.innerHTML = `
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${s.scheduledDate}</p>
+                        <p class="text-xs font-bold text-slate-900">${s.course}</p>
+                    </div>
+                    <span class="text-[8px] font-black px-2 py-1 rounded bg-slate-100 text-slate-500 uppercase">${s.status}</span>
+                `;
+                historyCont.appendChild(div);
+            });
+        }
+
+        window.savePrivateStudentNote = async () => {
+            if (!activeProfileStudentUid) return;
+            const notes = document.getElementById('privateTutorNotes').value;
+            const profileRef = doc(db, 'artifacts', appId, 'public', 'data', 'studentProfiles', activeProfileStudentUid);
+            await setDoc(profileRef, {
+                tutorNotes: notes,
+                lastUpdated: serverTimestamp()
+            }, { merge: true });
+        };
 
         window.saveBillingSettings = async () => { const rate = parseFloat(document.getElementById('hourlyRateInput').value); if (!isNaN(rate)) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'billing'), { hourlyRate: rate }); };
 
-        // --- MASTER SCHEDULE MONTH VIEW ---
+        // --- Notification Logic ---
+        window.toggleNotificationPanel = () => document.getElementById('notificationPanel').classList.toggle('open');
+        window.closeNotificationPanel = () => document.getElementById('notificationPanel').classList.remove('open');
+
+        function renderNotificationList() {
+            const list = document.getElementById('notificationList');
+            const pendingReqs = currentBookings.filter(b => b.status === 'requested');
+            const unreadChats = currentChats.filter(c => {
+                const last = c.messages?.[c.messages.length - 1];
+                return last && last.sender === 'student';
+            });
+
+            const total = pendingReqs.length + unreadChats.length;
+            document.getElementById('globalBellBadge').classList.toggle('hidden', total === 0);
+            document.getElementById('navBadgeAppointments').classList.toggle('hidden', pendingReqs.length === 0);
+            document.getElementById('navBadgeInbox').classList.toggle('hidden', unreadChats.length === 0);
+            document.getElementById('overviewPendingCount').innerText = pendingReqs.length;
+
+            list.innerHTML = '';
+            
+            if (total === 0) {
+                list.innerHTML = `<div class="py-20 text-center text-slate-400 italic text-sm">No urgent alerts.</div>`;
+                return;
+            }
+
+            pendingReqs.forEach(req => {
+                const div = document.createElement('div');
+                div.className = "bg-amber-50 p-4 rounded-2xl border border-amber-100 cursor-pointer hover:bg-amber-100 transition";
+                div.onclick = () => showSection('appointments');
+                div.innerHTML = `<p class="text-[10px] font-black text-amber-600 uppercase mb-1">New Appointment Request</p><p class="text-xs font-bold text-slate-900">${req.studentFirstName} • ${req.scheduledDate}</p>`;
+                list.appendChild(div);
+            });
+
+            unreadChats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = "bg-indigo-50 p-4 rounded-2xl border border-indigo-100 cursor-pointer hover:bg-indigo-100 transition";
+                div.onclick = () => { activeChatUid = chat.uid; showSection('inbox'); renderAdminChat(); renderChatSidebar(); };
+                div.innerHTML = `<p class="text-[10px] font-black text-indigo-600 uppercase mb-1">Incoming Message</p><p class="text-xs font-bold text-slate-900">Reply to ${chat.studentName}</p>`;
+                list.appendChild(div);
+            });
+        }
+
+        function showToast(msg) {
+            const cont = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = "toast-notify bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto border border-white/10";
+            toast.innerHTML = `<i data-lucide="info" class="text-indigo-400 w-4 h-4"></i><span class="text-xs font-bold">${msg}</span>`;
+            cont.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // --- Master Schedule ---
         function renderMasterCalendar() {
             const grid = document.getElementById('masterCalGrid'); grid.innerHTML = '';
             const first = new Date(masterCalYear, masterCalMonth, 1).getDay();
@@ -347,7 +608,7 @@
                 } else {
                     const override = specificDateSlots[dStr];
                     const weekly = currentWeeklySchedule[dayOfWeek];
-                    const slots = override ? override.slots : (weekly?.disabled ? [] : (weekly?.slots || []));
+                    const slots = override?.slots ? override.slots : (weekly?.disabled ? [] : (weekly?.slots || []));
 
                     slots.forEach(time => {
                         const booking = currentBookings.find(b => b.scheduledDate === dStr && b.scheduledTime === time && b.status !== 'cancelled');
@@ -355,7 +616,6 @@
                         if (booking) {
                             tag.className = "slot-tag tag-booked";
                             tag.innerText = `${time} • ${booking.studentFirstName}`;
-                            tag.title = `${time}: ${booking.studentFirstName} ${booking.studentLastName} (${booking.course})`;
                         } else {
                             tag.className = "slot-tag tag-available";
                             tag.innerText = `${time} • Open`;
@@ -369,7 +629,7 @@
 
         window.changeMasterCal = (dir) => { masterCalMonth += dir; if(masterCalMonth>11){masterCalMonth=0; masterCalYear++} if(masterCalMonth<0){masterCalMonth=11; masterCalYear--} renderMasterCalendar(); };
 
-        // --- AVAILABILITY LOGIC ---
+        // --- Rule Calendar ---
         function renderBlackoutCalendar() {
             const grid = document.getElementById('adminCalGrid'); grid.innerHTML = ''; 
             const first = new Date(adminCalYear, adminCalMonth, 1).getDay(), last = new Date(adminCalYear, adminCalMonth + 1, 0).getDate();
@@ -378,11 +638,11 @@
             for (let i = 0; i < first; i++) grid.appendChild(document.createElement('div'));
             for (let i = 1; i <= last; i++) {
                 const dStr = `${adminCalYear}-${String(adminCalMonth + 1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                const hasOverride = specificDateSlots[dStr] && (specificDateSlots[dStr].slots?.length > 0 || specificDateSlots[dStr].disabled);
+                const hasOverride = specificDateSlots[dStr] && specificDateSlots[dStr].slots?.length > 0;
                 const isBlackout = currentBlackouts.includes(dStr);
                 
                 const box = document.createElement('div'); 
-                box.className = `day-box ${isBlackout ? 'blackout' : ''} ${hasOverride ? 'has-override' : ''} ${selectedOverrideDate === dStr ? 'selected shadow-lg' : ''}`;
+                box.className = `day-box ${isBlackout ? 'blackout' : ''} ${hasOverride ? 'has-override' : ''} ${selectedOverrideDate === dStr ? 'selected' : ''}`;
                 box.innerText = i; 
                 box.onclick = () => { selectedOverrideDate = dStr; renderOverridePanel(); renderBlackoutCalendar(); }; 
                 grid.appendChild(box);
@@ -390,14 +650,10 @@
         }
 
         window.resetDayToNormal = async () => {
-            if (!confirm(`Reset ${selectedOverrideDate} to weekly default?`)) return;
-            const nextOverrides = {...specificDateSlots}; 
-            delete nextOverrides[selectedOverrideDate];
+            if (!confirm(`Permanently reset ${selectedOverrideDate}?`)) return;
+            const nextOverrides = {...specificDateSlots}; delete nextOverrides[selectedOverrideDate];
             const nextBlackouts = currentBlackouts.filter(x => x !== selectedOverrideDate);
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { 
-                specificDateSlots: nextOverrides, 
-                blackoutDates: nextBlackouts 
-            });
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { specificDateSlots: nextOverrides, blackoutDates: nextBlackouts });
             closeOverridePanel();
         };
 
@@ -407,10 +663,7 @@
             document.getElementById('overrideDateDisplay').innerText = selectedOverrideDate;
             const cont = document.getElementById('overrideSlotsContainer'); cont.innerHTML = '';
             (specificDateSlots[selectedOverrideDate]?.slots || []).forEach(s => { 
-                const tag = document.createElement('span'); 
-                tag.className = "bg-white/20 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-2"; 
-                tag.innerHTML = `${s} <button onclick="removeOverrideSlot('${s}')"><i data-lucide="x" class="w-3 h-3"></i></button>`; 
-                cont.appendChild(tag); 
+                const tag = document.createElement('span'); tag.className = "bg-white/20 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-2"; tag.innerHTML = `${s} <button onclick="removeOverrideSlot('${s}')"><i data-lucide="x" class="w-3 h-3"></i></button>`; cont.appendChild(tag); 
             });
             lucide.createIcons();
         }
@@ -420,22 +673,14 @@
             if (!next[selectedOverrideDate]) next[selectedOverrideDate] = { slots: [], disabled: false };
             if (!next[selectedOverrideDate].slots.includes(t)) { 
                 next[selectedOverrideDate].slots.push(t); 
-                next[selectedOverrideDate].slots.sort((a,b) => new Date('1970/01/01 '+a) - new Date('1970/01/01 '+b)); 
+                next[selectedOverrideDate].slots.sort((a,b) => new Date('1970/01/01 '+a)-new Date('1970/01/01 '+b)); 
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { specificDateSlots: next }); 
             }
             document.getElementById('overrideInput').value = '';
         };
 
-        window.removeOverrideSlot = async (s) => { 
-            const next = {...specificDateSlots}; 
-            next[selectedOverrideDate].slots = next[selectedOverrideDate].slots.filter(x => x !== s); 
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { specificDateSlots: next }); 
-        };
-        
-        window.toggleOverrideBlackout = async () => { 
-            let up = currentBlackouts.includes(selectedOverrideDate) ? currentBlackouts.filter(x => x !== selectedOverrideDate) : [...currentBlackouts, selectedOverrideDate]; 
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { blackoutDates: up }); 
-        };
+        window.removeOverrideSlot = async (s) => { const next = {...specificDateSlots}; next[selectedOverrideDate].slots = next[selectedOverrideDate].slots.filter(x => x !== s); await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { specificDateSlots: next }); };
+        window.toggleOverrideBlackout = async () => { let up = currentBlackouts.includes(selectedOverrideDate) ? currentBlackouts.filter(x => x !== selectedOverrideDate) : [...currentBlackouts, selectedOverrideDate]; await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { blackoutDates: up }); };
 
         function renderWeeklyEditor() {
             const cont = document.getElementById('weeklyScheduleContainer'); cont.innerHTML = '';
@@ -475,7 +720,7 @@
                 const item = document.createElement('div'), last = chat.messages?.[chat.messages.length-1];
                 item.className = `chat-sidebar-item p-6 border-b border-slate-50 cursor-pointer hover:bg-slate-50 ${activeChatUid === chat.uid ? 'active' : ''}`;
                 item.onclick = () => { activeChatUid = chat.uid; renderAdminChat(); renderChatSidebar(); };
-                item.innerHTML = `<div class="flex justify-between items-start mb-1"><span class="font-bold text-sm text-slate-800 text-slate-900">${chat.studentName || 'Student'}</span>${last?.sender === 'student' ? '<span class="w-2 h-2 bg-indigo-500 rounded-full"></span>' : ''}</div><p class="text-[10px] text-slate-400 truncate">${last?.text || ''}</p>`;
+                item.innerHTML = `<div class="flex justify-between items-start mb-1"><span class="font-bold text-sm text-slate-800 text-slate-900">${chat.studentName || 'Student'}</span>${last?.sender === 'student' ? '<span class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>' : ''}</div><p class="text-[10px] text-slate-400 truncate">${last?.text || ''}</p>`;
                 bar.appendChild(item);
             });
         }
