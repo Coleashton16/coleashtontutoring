@@ -3,350 +3,500 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tutor Admin | Ashton Nursing</title>
+    <title>Tutor Management Suite | Ashton Nursing</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
         .brand-font { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
         table { width: 100%; border-collapse: collapse; }
         th, td { border-bottom: 1px solid #f1f5f9; padding: 14px; text-align: left; }
         th { background-color: #f8fafc; font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; font-weight: 700; }
+        
+        /* Layout for the Big Master Calendar */
+        .master-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background-color: #e2e8f0; border: 1px solid #e2e8f0; }
+        .master-day-header { background-color: #f8fafc; padding: 12px; text-align: center; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em; }
+        .master-day-cell { background-color: white; min-height: 150px; padding: 8px; position: relative; transition: all 0.2s; }
+        .master-day-cell:hover { background-color: #fdfdfd; }
+        .master-day-cell.other-month { background-color: #f8fafc; color: #cbd5e1; }
+        .day-number { font-weight: 800; font-size: 14px; margin-bottom: 8px; display: block; color: #1e293b; }
+        
+        /* Slot Tags */
+        .slot-tag { font-size: 9px; font-weight: 700; padding: 4px 6px; border-radius: 6px; margin-bottom: 4px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left-width: 3px; }
+        .tag-available { background-color: #f0fdf4; color: #166534; border-left-color: #22c55e; }
+        .tag-booked { background-color: #eef2ff; color: #3730a3; border-left-color: #4f46e5; }
+        .tag-blocked { background-color: #fff1f2; color: #9f1239; border-left-color: #ef4444; font-style: italic; }
+
+        /* Rule Calendar Grid */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-        .day-box { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+        .day-box { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; position: relative; }
         .day-box.blackout { background-color: #fee2e2; color: #ef4444; border-color: #fecaca; text-decoration: line-through; }
-        .day-box:hover:not(.empty) { background-color: #f1f5f9; }
-        .status-badge { padding: 4px 10px; border-radius: 99px; font-size: 10px; font-weight: 800; letter-spacing: 0.02em; }
-        .btn-action { padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; transition: all 0.2s; border-width: 1px; }
+        .day-box.has-override { border-color: #4f46e5; color: #4f46e5; background-color: #eef2ff; }
+        .day-box.selected { background-color: #4f46e5 !important; color: white !important; border-color: #4f46e5; z-index: 10; shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        
+        .chat-sidebar-item.active { background-color: #f1f5f9; border-left: 4px solid #4f46e5; }
+        .msg-admin { background: #4f46e5; color: white; align-self: flex-end; border-radius: 12px 12px 0 12px; }
+        .msg-student { background: #f1f5f9; color: #1e293b; align-self: flex-start; border-radius: 12px 12px 12px 0; }
+        
+        .modal-backdrop { background-color: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
     <!-- Login Section -->
-    <div id="loginSection" class="max-w-sm mx-auto mt-32 bg-white p-8 rounded-[2rem] shadow-2xl border border-slate-100">
-        <div class="flex flex-col items-center mb-8">
-            <div class="bg-indigo-600 p-4 rounded-2xl mb-4 shadow-lg shadow-indigo-200">
-                <i data-lucide="shield-check" class="text-white w-8 h-8"></i>
+    <div id="loginSection" class="fixed inset-0 z-[1000] bg-slate-50 flex items-center justify-center p-6">
+        <div class="max-w-sm w-full bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 text-center">
+            <div class="bg-indigo-600 p-4 rounded-3xl w-16 h-16 flex items-center justify-center mx-auto mb-6 shadow-xl text-white">
+                <i data-lucide="shield-check" class="w-8 h-8"></i>
             </div>
-            <h1 class="text-2xl font-bold brand-font text-slate-900">Admin Portal</h1>
-            <p class="text-sm text-slate-500">Cole Ashton Tutoring Management</p>
-        </div>
-        <div class="space-y-4">
-            <input type="email" id="email" placeholder="admin@admin.com" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
-            <input type="password" id="password" placeholder="••••••••" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition" onkeydown="if(event.key === 'Enter') login()">
-            <button onclick="login()" id="loginBtn" class="w-full bg-slate-900 text-white p-4 rounded-xl font-bold hover:bg-black transition shadow-lg">Sign In</button>
+            <h1 class="text-2xl font-extrabold brand-font mb-2 text-slate-900">Admin Portal</h1>
+            <p class="text-sm text-slate-400 mb-8 font-medium">Ashton Nursing Mentor Management</p>
+            <div class="space-y-4">
+                <input type="email" id="email" placeholder="admin@admin.com" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="password" id="password" placeholder="Password" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" onkeydown="if(event.key === 'Enter') login()">
+                <button onclick="login()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition">Enter Dashboard</button>
+            </div>
         </div>
     </div>
 
-    <!-- Admin Dashboard -->
-    <div id="adminDashboard" class="hidden">
-        <nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-xl">
+    <!-- Main Admin Dashboard -->
+    <div id="adminDashboard" class="hidden flex-1 flex flex-col">
+        <!-- Top Nav -->
+        <nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-[100]">
             <div class="flex items-center gap-3">
                 <div class="bg-indigo-600 p-1.5 rounded-lg"><i data-lucide="layout-dashboard" class="text-white w-4 h-4"></i></div>
-                <h1 class="font-bold tracking-tight brand-font">Tutor Management</h1>
+                <h1 class="font-black brand-font tracking-tight text-lg uppercase">Tutor Command</h1>
             </div>
-            <div class="flex items-center gap-8 text-sm font-semibold">
-                <button onclick="scrollToSection('scheduleSection')" class="text-slate-400 hover:text-white transition">Availability</button>
-                <button onclick="scrollToSection('bookingsSection')" class="text-slate-400 hover:text-white transition">Appointments</button>
-                <button onclick="logout()" class="text-red-400 hover:text-red-300 transition">Log Out</button>
+            <div class="flex items-center gap-8">
+                <nav class="hidden md:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <button onclick="showSection('overview')" class="hover:text-white transition">Overview</button>
+                    <button onclick="showSection('master')" class="hover:text-white transition">Master Schedule</button>
+                    <button onclick="showSection('appointments')" class="hover:text-white transition">Appointments</button>
+                    <button onclick="showSection('availability')" class="hover:text-white transition">Availability Rules</button>
+                    <button onclick="showSection('inbox')" class="hover:text-white transition relative">
+                        Inbox <span id="globalInboxBadge" class="absolute -top-2 -right-2 w-2 h-2 bg-red-500 rounded-full hidden animate-pulse"></span>
+                    </button>
+                </nav>
+                <button onclick="logout()" class="text-red-400 text-[10px] font-black uppercase border border-red-400/30 px-3 py-1.5 rounded-lg hover:bg-red-400 hover:text-white transition">Log Out</button>
             </div>
         </nav>
 
-        <main class="max-w-7xl mx-auto p-6 md:p-10 space-y-12">
+        <!-- Dynamic Content -->
+        <main class="flex-1 p-6 md:p-10 max-w-full mx-auto w-full">
             
-            <section id="scheduleSection" class="grid lg:grid-cols-3 gap-8">
-                <!-- Weekly Recurring -->
-                <div class="lg:col-span-2 bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="p-8 border-b border-slate-100 flex justify-between items-center">
-                        <h2 class="text-xl font-bold brand-font">Weekly Recurring Availability</h2>
-                        <span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-1 rounded font-bold uppercase">Pro-tip: Press Enter to Add</span>
-                    </div>
-                    <div class="p-8 space-y-4" id="weeklyScheduleContainer"></div>
-                </div>
-
-                <!-- Blackout Calendar -->
-                <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="p-8 border-b border-slate-100">
-                        <h2 class="text-xl font-bold brand-font text-red-600">Blackout Dates</h2>
-                        <p class="text-xs text-slate-500 mt-1 text-slate-400">Tap a date to block it entirely.</p>
-                    </div>
-                    <div class="p-8">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 id="adminCalMonth" class="font-bold text-slate-900 text-sm">Month</h3>
-                            <div class="flex gap-1">
-                                <button onclick="changeAdminCal(-1)" class="p-1 hover:bg-slate-100 rounded transition"><i data-lucide="chevron-left" class="w-4 h-4 text-slate-400"></i></button>
-                                <button onclick="changeAdminCal(1)" class="p-1 hover:bg-slate-100 rounded transition"><i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i></button>
-                            </div>
+            <!-- SECTION: Overview -->
+            <section id="section-overview" class="admin-section space-y-8 max-w-7xl mx-auto">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200">
+                        <h3 class="text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Global Rate Setting</h3>
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl font-black brand-font text-slate-900">$</span>
+                            <input type="number" id="hourlyRateInput" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold text-xl outline-none focus:ring-2 focus:ring-green-500" value="50" onchange="saveBillingSettings()">
+                            <span class="text-xs font-bold text-slate-400">/hr</span>
                         </div>
-                        <div id="adminCalGrid" class="calendar-grid"></div>
+                    </div>
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col justify-center">
+                        <h3 class="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Total Bookings</h3>
+                        <p id="statTotalBookings" class="text-4xl font-black brand-font text-indigo-600">0</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col justify-center">
+                        <h3 class="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Active Chats</h3>
+                        <p id="statActiveChats" class="text-4xl font-black brand-font text-green-600">0</p>
                     </div>
                 </div>
             </section>
 
-            <!-- Bookings List -->
-            <section id="bookingsSection" class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-                <div class="p-8 border-b border-slate-100"><h2 class="text-xl font-bold brand-font text-slate-900">Appointment Requests</h2></div>
-                <div class="overflow-x-auto">
-                    <table id="requestsTable">
-                        <thead>
-                            <tr>
-                                <th>Date/Time</th>
-                                <th>Student</th>
-                                <th>Course</th>
-                                <th>Location</th>
-                                <th>Status</th>
-                                <th class="text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
+            <!-- SECTION: Master Schedule (Big Calendar) -->
+            <section id="section-master" class="admin-section hidden">
+                <div class="bg-white rounded-[3rem] shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-white sticky left-0">
+                        <div>
+                            <h2 class="text-2xl font-black brand-font text-slate-900">Master Schedule</h2>
+                            <p class="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] mt-1">Full Month Attendance & Openings</p>
+                        </div>
+                        <div class="flex items-center gap-6">
+                            <div class="flex gap-4 text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                                <div class="flex items-center gap-1.5"><div class="w-2 h-2 bg-green-500 rounded-full"></div> Open Slot</div>
+                                <div class="flex items-center gap-1.5"><div class="w-2 h-2 bg-indigo-500 rounded-full"></div> Booked</div>
+                                <div class="flex items-center gap-1.5"><div class="w-2 h-2 bg-red-400 rounded-full"></div> Blacked Out</div>
+                            </div>
+                            <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-2xl">
+                                <button onclick="changeMasterCal(-1)" class="p-2 hover:bg-white rounded-xl transition shadow-sm"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                                <h3 id="masterCalMonth" class="font-black text-sm text-slate-900 min-w-[140px] text-center uppercase tracking-widest"></h3>
+                                <button onclick="changeMasterCal(1)" class="p-2 hover:bg-white rounded-xl transition shadow-sm"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="master-calendar-grid">
+                        <div class="master-day-header">Sun</div>
+                        <div class="master-day-header">Mon</div>
+                        <div class="master-day-header">Tue</div>
+                        <div class="master-day-header">Wed</div>
+                        <div class="master-day-header">Thu</div>
+                        <div class="master-day-header">Fri</div>
+                        <div class="master-day-header">Sat</div>
+                    </div>
+                    <div id="masterCalGrid" class="master-calendar-grid">
+                        <!-- Generated JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: Appointments -->
+            <section id="section-appointments" class="admin-section hidden max-w-7xl mx-auto">
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-8 border-b border-slate-100 flex justify-between items-center text-slate-900">
+                        <h2 class="text-xl font-extrabold brand-font">Session Requests</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table id="requestsTable">
+                            <thead>
+                                <tr><th>Date/Time</th><th>Student</th><th>Course</th><th>Status</th><th class="text-right">Manage</th></tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: Availability Rules -->
+            <section id="section-availability" class="admin-section hidden grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8">
+                        <h2 class="text-xl font-extrabold brand-font mb-6 text-slate-900">Weekly Recurring Schedule</h2>
+                        <div id="weeklyScheduleContainer" class="space-y-3"></div>
+                    </div>
+
+                    <div id="dailyOverridePanel" class="bg-indigo-900 text-white rounded-[2.5rem] shadow-xl p-8 hidden">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 id="overrideDateDisplay" class="text-xl font-black brand-font"></h3>
+                                <p class="text-xs text-indigo-300 font-bold uppercase">Daily Override Hours</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="resetDayToNormal()" class="bg-red-500/20 text-red-200 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition">Reset Day</button>
+                                <button onclick="closeOverridePanel()" class="p-2 hover:bg-indigo-800 rounded-xl transition"><i data-lucide="x"></i></button>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="flex flex-wrap gap-2" id="overrideSlotsContainer"></div>
+                            <div class="flex gap-4">
+                                <div class="flex-1 flex bg-white/10 rounded-2xl border border-white/20 overflow-hidden focus-within:ring-2 focus-within:ring-white/40 transition">
+                                    <input type="text" id="overrideInput" placeholder="Add time (e.g. 10am or 14:00)" class="flex-1 p-4 bg-transparent outline-none text-sm placeholder:text-indigo-400" onkeydown="if(event.key==='Enter') addOverrideSlot()">
+                                    <button onclick="addOverrideSlot()" class="px-6 bg-white text-indigo-900 font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition">Add</button>
+                                </div>
+                                <button onclick="toggleOverrideBlackout()" id="overrideBlackoutBtn" class="px-6 py-4 border border-white/20 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-500 transition">Toggle Blackout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8">
+                    <h2 class="text-xl font-extrabold brand-font mb-2 text-slate-900">Rule Calendar</h2>
+                    <p class="text-[10px] font-black text-slate-400 mb-6 uppercase tracking-[0.2em]">Select a day to override</p>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 id="adminCalMonth" class="font-bold text-sm text-slate-800 uppercase tracking-widest"></h3>
+                        <div class="flex gap-1">
+                            <button onclick="changeAdminCal(-1)" class="p-1 hover:bg-slate-100 rounded-lg transition"><i data-lucide="chevron-left" class="w-4 h-4 text-slate-400"></i></button>
+                            <button onclick="changeAdminCal(1)" class="p-1 hover:bg-slate-100 rounded-lg transition"><i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i></button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid mb-2 text-[10px] font-black text-slate-300 text-center uppercase tracking-widest">
+                        <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                    </div>
+                    <div id="adminCalGrid" class="calendar-grid"></div>
+                </div>
+            </section>
+
+            <!-- SECTION: Inbox -->
+            <section id="section-inbox" class="admin-section hidden h-[70vh] bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden flex max-w-7xl mx-auto">
+                <div class="w-1/3 border-r border-slate-100 flex flex-col">
+                    <div class="p-6 border-b border-slate-100 font-black brand-font uppercase text-[10px] tracking-widest text-slate-900">Conversations</div>
+                    <div id="chatSidebar" class="flex-1 overflow-y-auto"></div>
+                </div>
+                <div class="flex-1 flex flex-col bg-slate-50/50">
+                    <div id="chatHeader" class="p-6 border-b border-slate-100 bg-white flex items-center justify-between">
+                        <span id="activeChatName" class="font-bold text-slate-900">Select a student</span>
+                    </div>
+                    <div id="adminChatMessages" class="flex-1 overflow-y-auto p-8 flex flex-col gap-4"></div>
+                    <div id="chatInputArea" class="p-6 bg-white border-t border-slate-100 flex gap-4 hidden">
+                        <input type="text" id="adminChatInput" placeholder="Type reply..." class="flex-1 p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" onkeydown="if(event.key === 'Enter') sendAdminMessage()">
+                        <button onclick="sendAdminMessage()" class="bg-indigo-600 text-white px-8 rounded-2xl font-bold hover:bg-indigo-700 transition shadow-lg">SEND</button>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
 
+    <!-- Finalize Modal -->
+    <div id="invoiceModal" class="fixed inset-0 z-[500] modal-backdrop flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div class="bg-green-600 p-8 text-white">
+                <h3 class="text-2xl font-black brand-font uppercase">Finalize Session</h3>
+                <p class="text-xs font-bold opacity-80 mt-1 uppercase tracking-widest">Review & Bill</p>
+            </div>
+            <div class="p-8 space-y-6 text-slate-900">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Hours Attended</label>
+                    <input type="number" id="invHours" value="1" step="0.25" class="w-full p-4 bg-slate-50 border rounded-2xl font-black text-xl outline-none" oninput="updateModalTotal()">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Clinical Comments</label>
+                    <textarea id="invComments" rows="4" placeholder="E.g. Mastery demonstrated..." class="w-full p-4 bg-slate-50 border rounded-2xl outline-none text-sm"></textarea>
+                </div>
+                <div id="invTotalDisplay" class="text-center font-black text-2xl text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">$50.00</div>
+                <div class="flex gap-4">
+                    <button onclick="closeInvoiceModal()" class="flex-1 font-bold text-slate-400 hover:text-slate-600 transition">Cancel</button>
+                    <button onclick="submitCompletion()" class="flex-[2] py-4 bg-slate-900 text-white font-black rounded-2xl uppercase tracking-widest shadow-xl hover:bg-black transition">Complete Session</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, query, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, doc, updateDoc, deleteDoc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyDRLarhK20JltsckgrZRVJBDt4A4FTkUSk", authDomain: "coleashtontut.firebaseapp.com", projectId: "coleashtontut", storageBucket: "coleashtontut.firebasestorage.app", messagingSenderId: "277509432126", appId: "1:277509432126:web:08c3221cbf3d1336a3c26f" };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = "coleashtontut";
-        const ADMIN_EMAIL = "admin@admin.com";
+        const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), appId = "coleashtontut", ADMIN_EMAIL = "admin@admin.com";
 
-        let currentWeeklySchedule = {}; 
-        let currentBlackouts = []; 
-        let adminCalMonth = new Date().getMonth();
-        let adminCalYear = new Date().getFullYear();
+        let currentWeeklySchedule = {}, currentBlackouts = [], specificDateSlots = {}, currentBookings = [], currentChats = [], activeChatUid = null, selectedOverrideDate = null, adminCalMonth = new Date().getMonth(), adminCalYear = new Date().getFullYear();
+        let masterCalMonth = new Date().getMonth(), masterCalYear = new Date().getFullYear();
+        let globalHourlyRate = 50;
 
         lucide.createIcons();
 
-        // Standardize time inputs (14:00 -> 02:00 PM, 10am -> 10:00 AM)
-        function standardizeTime(input) {
-            let res = input.trim().toLowerCase().replace(/\./g, '').replace(/\s/g, '');
-            if (!res) return null;
-
-            // Handle "1400" or "0900"
-            if (/^\d{4}$/.test(res)) res = res.slice(0, 2) + ":" + res.slice(2);
-            // Handle "10"
-            if (/^\d{1,2}$/.test(res)) res = res + ":00";
-
-            let hours, mins, ampm;
-            // Match H, HH, H:MM, HH:MM followed by optional AM/PM
-            const match = res.match(/^(\d{1,2})(?::(\d{2}))?(am|pm)?$/);
-            if (!match) return null;
-
-            hours = parseInt(match[1]);
-            mins = match[2] || "00";
-            ampm = match[3];
-
-            // Logic for military time (if no am/pm specified and hours >= 12, it's PM)
-            if (!ampm) {
-                if (hours >= 12) {
-                    ampm = "pm";
-                    if (hours > 12) hours -= 12;
-                } else {
-                    ampm = "am";
-                    if (hours === 0) hours = 12;
-                }
-            } else {
-                // Correct 12 AM/PM
-                if (hours > 12) hours %= 12;
-                if (hours === 0) hours = 12;
-            }
-
-            return `${String(hours).padStart(2, '0')}:${mins} ${ampm.toUpperCase()}`;
+        function formatTimeInput(input) {
+            let res = input.trim().toLowerCase().replace(/\s/g, ''); if (!res) return null; if (/^\d{1,2}$/.test(res)) res += ":00"; if (/^\d{4}$/.test(res)) res = res.slice(0,2) + ":" + res.slice(2);
+            const match = res.match(/^(\d{1,2})(?::(\d{2}))?(am|pm)?$/); if (!match) return null;
+            let h = parseInt(match[1]), m = match[2] || "00", p = match[3];
+            if (!p) { if (h >= 12) { p = "pm"; if (h > 12) h -= 12; } else { p = "am"; if (h === 0) h = 12; } } else { if (h > 12) h %= 12; if (h === 0) h = 12; }
+            return `${String(h).padStart(2, '0')}:${m} ${p.toUpperCase()}`;
         }
 
-        window.login = async () => {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            if (email !== ADMIN_EMAIL) return alert("Access Denied.");
-            try { await signInWithEmailAndPassword(auth, email, pass); } catch (e) { alert("Login failed. Check password."); }
+        window.showSection = (id) => { 
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.add('hidden')); 
+            document.getElementById(`section-${id}`).classList.remove('hidden'); 
+            if (id === 'master') renderMasterCalendar();
         };
 
-        window.logout = () => signOut(auth);
-        window.scrollToSection = (id) => document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.login = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } catch (err) { alert("Invalid credentials."); } };
+        window.logout = () => signOut(auth).then(() => location.reload());
 
-        onAuthStateChanged(auth, (user) => {
-            if (user && user.email === ADMIN_EMAIL) {
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('adminDashboard').classList.remove('hidden');
-                initData();
-            } else {
-                document.getElementById('loginSection').classList.remove('hidden');
-                document.getElementById('adminDashboard').classList.add('hidden');
-            }
-        });
+        onAuthStateChanged(auth, (user) => { if (user?.email === ADMIN_EMAIL) { document.getElementById('loginSection').classList.add('hidden'); document.getElementById('adminDashboard').classList.remove('hidden'); initData(); } });
 
         function initData() {
-            const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability');
-            onSnapshot(settingsRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    currentWeeklySchedule = data.weeklySchedule || {};
-                    currentBlackouts = data.blackoutDates || [];
-                    renderWeeklyEditor();
-                    renderBlackoutCalendar();
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), (snap) => { 
+                if (snap.exists()) { 
+                    const d = snap.data(); 
+                    currentWeeklySchedule = d.weeklySchedule || {}; 
+                    currentBlackouts = d.blackoutDates || []; 
+                    specificDateSlots = d.specificDateSlots || {}; 
+                    renderWeeklyEditor(); 
+                    renderBlackoutCalendar(); 
+                    if (selectedOverrideDate) renderOverridePanel(); 
+                    renderMasterCalendar(); 
+                } 
+            });
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'billing'), (snap) => { if (snap.exists()) { globalHourlyRate = snap.data().hourlyRate || 50; document.getElementById('hourlyRateInput').value = globalHourlyRate; } });
+            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'bookings')), (snap) => { 
+                currentBookings = snap.docs.map(d => ({ id: d.id, ...d.data() })); 
+                renderBookingsTable(); 
+                document.getElementById('statTotalBookings').innerText = currentBookings.length; 
+                renderMasterCalendar(); 
+            });
+            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'chats')), (snap) => { 
+                currentChats = snap.docs.map(d => ({ uid: d.id, ...d.data() })); 
+                renderChatSidebar(); 
+                if (activeChatUid) renderAdminChat(); 
+                document.getElementById('statActiveChats').innerText = currentChats.length; 
+            });
+        }
+
+        window.saveBillingSettings = async () => { const rate = parseFloat(document.getElementById('hourlyRateInput').value); if (!isNaN(rate)) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'billing'), { hourlyRate: rate }); };
+
+        // --- MASTER SCHEDULE MONTH VIEW ---
+        function renderMasterCalendar() {
+            const grid = document.getElementById('masterCalGrid'); grid.innerHTML = '';
+            const first = new Date(masterCalYear, masterCalMonth, 1).getDay();
+            const last = new Date(masterCalYear, masterCalMonth + 1, 0).getDate();
+            document.getElementById('masterCalMonth').innerText = `${new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(masterCalYear, masterCalMonth))} ${masterCalYear}`;
+            
+            const prevLast = new Date(masterCalYear, masterCalMonth, 0).getDate();
+            for (let i = first - 1; i >= 0; i--) {
+                const cell = document.createElement('div'); cell.className = "master-day-cell other-month";
+                cell.innerHTML = `<span class="day-number opacity-20">${prevLast - i}</span>`;
+                grid.appendChild(cell);
+            }
+
+            for (let i = 1; i <= last; i++) {
+                const dStr = `${masterCalYear}-${String(masterCalMonth + 1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                const dayOfWeek = new Date(masterCalYear, masterCalMonth, i).getDay();
+                const cell = document.createElement('div'); cell.className = "master-day-cell overflow-y-auto";
+                cell.innerHTML = `<span class="day-number">${i}</span>`;
+
+                const isBlackout = currentBlackouts.includes(dStr);
+                if (isBlackout) {
+                    cell.innerHTML += `<div class="slot-tag tag-blocked">Blacked Out</div>`;
                 } else {
-                    setDoc(settingsRef, { 
-                        weeklySchedule: {0:{slots:[], disabled:true}, 1:{slots:["09:00 AM"], disabled:false}, 2:{slots:["09:00 AM"], disabled:false}, 3:{slots:["09:00 AM"], disabled:false}, 4:{slots:["09:00 AM"], disabled:false}, 5:{slots:["09:00 AM"], disabled:false}, 6:{slots:[], disabled:true}}, 
-                        blackoutDates: [] 
+                    const override = specificDateSlots[dStr];
+                    const weekly = currentWeeklySchedule[dayOfWeek];
+                    const slots = override ? override.slots : (weekly?.disabled ? [] : (weekly?.slots || []));
+
+                    slots.forEach(time => {
+                        const booking = currentBookings.find(b => b.scheduledDate === dStr && b.scheduledTime === time && b.status !== 'cancelled');
+                        const tag = document.createElement('div');
+                        if (booking) {
+                            tag.className = "slot-tag tag-booked";
+                            tag.innerText = `${time} • ${booking.studentFirstName}`;
+                            tag.title = `${time}: ${booking.studentFirstName} ${booking.studentLastName} (${booking.course})`;
+                        } else {
+                            tag.className = "slot-tag tag-available";
+                            tag.innerText = `${time} • Open`;
+                        }
+                        cell.appendChild(tag);
                     });
                 }
-            });
-
-            onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'bookings')), (snapshot) => {
-                renderBookingsTable(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
-            });
+                grid.appendChild(cell);
+            }
         }
 
-        function renderWeeklyEditor() {
-            const container = document.getElementById('weeklyScheduleContainer');
-            container.innerHTML = '';
-            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        window.changeMasterCal = (dir) => { masterCalMonth += dir; if(masterCalMonth>11){masterCalMonth=0; masterCalYear++} if(masterCalMonth<0){masterCalMonth=11; masterCalYear--} renderMasterCalendar(); };
 
-            days.forEach((dayName, index) => {
-                const dayData = currentWeeklySchedule[index] || { slots: [], disabled: false };
-                const row = document.createElement('div');
-                row.className = `p-4 rounded-xl border transition ${dayData.disabled ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'}`;
-                
-                row.innerHTML = `
-                    <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
-                        <div class="w-24 shrink-0 font-bold text-sm text-slate-700">${dayName}</div>
-                        <div class="flex-1 flex flex-wrap gap-2">
-                            ${dayData.slots.map(slot => `
-                                <div class="bg-white px-2 py-1 rounded border border-slate-200 text-xs font-bold flex items-center gap-1 shadow-sm">
-                                    ${slot}
-                                    <button onclick="removeWeeklyTime(${index}, '${slot}')" class="text-slate-300 hover:text-red-500 transition"><i data-lucide="x-circle" class="w-3 h-3"></i></button>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="flex gap-2">
-                            ${!dayData.disabled ? `
-                                <div class="flex bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 transition">
-                                    <input id="input-${index}" type="text" placeholder="e.g. 14:00" class="w-20 px-2 py-1 text-xs outline-none" onkeydown="if(event.key === 'Enter') addWeeklyTime(${index})">
-                                    <button onclick="addWeeklyTime(${index})" class="px-3 bg-indigo-600 text-white text-[10px] font-bold hover:bg-indigo-700 transition">ADD</button>
-                                </div>
-                            ` : ''}
-                            <button onclick="toggleDayAvailability(${index})" class="px-3 py-1 text-[10px] font-bold rounded-lg border bg-white shadow-sm transition ${dayData.disabled ? 'text-green-600 border-green-200 hover:bg-green-50' : 'text-red-600 border-red-200 hover:bg-red-50'}">
-                                ${dayData.disabled ? 'ENABLE' : 'DISABLE DAY'}
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(row);
-            });
-            lucide.createIcons();
-        }
-
-        window.toggleDayAvailability = async (index) => {
-            const updated = {...currentWeeklySchedule};
-            if (!updated[index]) updated[index] = { slots: [], disabled: false };
-            updated[index].disabled = !updated[index].disabled;
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { weeklySchedule: updated });
-        }
-
-        window.addWeeklyTime = async (index) => {
-            const input = document.getElementById(`input-${index}`);
-            const formatted = standardizeTime(input.value);
-            
-            if (!formatted) {
-                input.classList.add('ring-2', 'ring-red-400');
-                setTimeout(() => input.classList.remove('ring-2', 'ring-red-400'), 1000);
-                return;
-            }
-
-            const updated = {...currentWeeklySchedule};
-            if (!updated[index]) updated[index] = { slots: [], disabled: false };
-            
-            if (!updated[index].slots.includes(formatted)) {
-                updated[index].slots.push(formatted);
-                updated[index].slots.sort((a, b) => {
-                    return new Date('1970/01/01 ' + a) - new Date('1970/01/01 ' + b);
-                });
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { weeklySchedule: updated });
-            }
-            input.value = '';
-            input.focus();
-        };
-
-        window.removeWeeklyTime = async (index, time) => {
-            const updated = {...currentWeeklySchedule};
-            if (updated[index] && updated[index].slots) {
-                updated[index].slots = updated[index].slots.filter(t => t !== time);
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { weeklySchedule: updated });
-            }
-        };
-
+        // --- AVAILABILITY LOGIC ---
         function renderBlackoutCalendar() {
-            const grid = document.getElementById('adminCalGrid');
-            grid.innerHTML = '';
-            const firstDay = new Date(adminCalYear, adminCalMonth, 1).getDay();
-            const daysInMonth = new Date(adminCalYear, adminCalMonth + 1, 0).getDate();
+            const grid = document.getElementById('adminCalGrid'); grid.innerHTML = ''; 
+            const first = new Date(adminCalYear, adminCalMonth, 1).getDay(), last = new Date(adminCalYear, adminCalMonth + 1, 0).getDate();
             document.getElementById('adminCalMonth').innerText = `${new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(adminCalYear, adminCalMonth))} ${adminCalYear}`;
-            for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div'));
-            for (let i = 1; i <= daysInMonth; i++) {
-                const dateStr = `${adminCalYear}-${String(adminCalMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                const box = document.createElement('div');
-                box.className = `day-box ${currentBlackouts.includes(dateStr) ? 'blackout' : ''}`;
-                box.innerText = i;
-                box.onclick = async () => {
-                    let updated = currentBlackouts.includes(dateStr) ? currentBlackouts.filter(d => d !== dateStr) : [...currentBlackouts, dateStr];
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { blackoutDates: updated });
-                };
+            
+            for (let i = 0; i < first; i++) grid.appendChild(document.createElement('div'));
+            for (let i = 1; i <= last; i++) {
+                const dStr = `${adminCalYear}-${String(adminCalMonth + 1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                const hasOverride = specificDateSlots[dStr] && (specificDateSlots[dStr].slots?.length > 0 || specificDateSlots[dStr].disabled);
+                const isBlackout = currentBlackouts.includes(dStr);
+                
+                const box = document.createElement('div'); 
+                box.className = `day-box ${isBlackout ? 'blackout' : ''} ${hasOverride ? 'has-override' : ''} ${selectedOverrideDate === dStr ? 'selected shadow-lg' : ''}`;
+                box.innerText = i; 
+                box.onclick = () => { selectedOverrideDate = dStr; renderOverridePanel(); renderBlackoutCalendar(); }; 
                 grid.appendChild(box);
             }
         }
 
-        function renderBookingsTable(data) {
-            const body = document.getElementById('tableBody');
-            body.innerHTML = '';
-            data.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)).forEach(item => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><div class="font-bold text-xs text-slate-900">${item.scheduledDate}</div><div class="text-[10px] text-slate-500">${item.scheduledTime}</div></td>
-                    <td><div class="text-xs font-bold text-slate-700">${item.studentFirstName} ${item.studentLastName}</div><div class="text-[10px] text-indigo-500">${item.studentEmail}</div></td>
-                    <td class="text-[10px] font-bold uppercase text-slate-500">${item.course}</td>
-                    <td class="text-[10px] text-slate-400 font-bold uppercase">${item.location}</td>
-                    <td><span class="status-badge ${item.status === 'confirmed' ? 'bg-green-100 text-green-700' : item.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}">${item.status.toUpperCase()}</span></td>
-                    <td class="text-right">
-                        <div class="flex justify-end gap-1">
-                            <button onclick="updateStatus('${item.id}', 'confirmed')" class="btn-action border-green-200 text-green-600 hover:bg-green-600 hover:text-white">Approve</button>
-                            <button onclick="updateStatus('${item.id}', 'cancelled')" class="btn-action border-red-200 text-red-600 hover:bg-red-600 hover:text-white">Deny</button>
-                            <button onclick="deleteRow('${item.id}')" class="p-2 text-slate-300 hover:text-red-500 transition" title="Delete Record"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    </td>`;
+        window.resetDayToNormal = async () => {
+            if (!confirm(`Reset ${selectedOverrideDate} to weekly default?`)) return;
+            const nextOverrides = {...specificDateSlots}; 
+            delete nextOverrides[selectedOverrideDate];
+            const nextBlackouts = currentBlackouts.filter(x => x !== selectedOverrideDate);
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { 
+                specificDateSlots: nextOverrides, 
+                blackoutDates: nextBlackouts 
+            });
+            closeOverridePanel();
+        };
+
+        window.closeOverridePanel = () => { selectedOverrideDate = null; document.getElementById('dailyOverridePanel').classList.add('hidden'); renderBlackoutCalendar(); };
+        function renderOverridePanel() {
+            document.getElementById('dailyOverridePanel').classList.remove('hidden'); 
+            document.getElementById('overrideDateDisplay').innerText = selectedOverrideDate;
+            const cont = document.getElementById('overrideSlotsContainer'); cont.innerHTML = '';
+            (specificDateSlots[selectedOverrideDate]?.slots || []).forEach(s => { 
+                const tag = document.createElement('span'); 
+                tag.className = "bg-white/20 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-2"; 
+                tag.innerHTML = `${s} <button onclick="removeOverrideSlot('${s}')"><i data-lucide="x" class="w-3 h-3"></i></button>`; 
+                cont.appendChild(tag); 
+            });
+            lucide.createIcons();
+        }
+
+        window.addOverrideSlot = async () => {
+            const t = formatTimeInput(document.getElementById('overrideInput').value); if (!t) return; const next = {...specificDateSlots};
+            if (!next[selectedOverrideDate]) next[selectedOverrideDate] = { slots: [], disabled: false };
+            if (!next[selectedOverrideDate].slots.includes(t)) { 
+                next[selectedOverrideDate].slots.push(t); 
+                next[selectedOverrideDate].slots.sort((a,b) => new Date('1970/01/01 '+a) - new Date('1970/01/01 '+b)); 
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { specificDateSlots: next }); 
+            }
+            document.getElementById('overrideInput').value = '';
+        };
+
+        window.removeOverrideSlot = async (s) => { 
+            const next = {...specificDateSlots}; 
+            next[selectedOverrideDate].slots = next[selectedOverrideDate].slots.filter(x => x !== s); 
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { specificDateSlots: next }); 
+        };
+        
+        window.toggleOverrideBlackout = async () => { 
+            let up = currentBlackouts.includes(selectedOverrideDate) ? currentBlackouts.filter(x => x !== selectedOverrideDate) : [...currentBlackouts, selectedOverrideDate]; 
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { blackoutDates: up }); 
+        };
+
+        function renderWeeklyEditor() {
+            const cont = document.getElementById('weeklyScheduleContainer'); cont.innerHTML = '';
+            ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((day, i) => {
+                const d = currentWeeklySchedule[i] || { slots: [], disabled: false }; const div = document.createElement('div');
+                div.className = `p-4 rounded-3xl border flex items-center gap-4 ${d.disabled ? 'bg-red-50 opacity-60' : 'bg-slate-50'}`;
+                div.innerHTML = `<div class="w-12 text-[10px] font-black uppercase text-slate-400">${day}</div><div class="flex-1 flex flex-wrap gap-2">${d.slots.map(s => `<span class="bg-white border text-[10px] font-black px-2 py-1 rounded-lg flex items-center gap-1">${s}<button onclick="removeSlot(${i},'${s}')" class="text-slate-300"><i data-lucide="x" class="w-2 h-2"></i></button></span>`).join('')}</div><div class="flex gap-2">${!d.disabled ? `<input id="add-${i}" type="text" placeholder="10am" class="w-16 p-2 text-xs border rounded-xl" onkeydown="if(event.key==='Enter') addSlot(${i})">` : ''}<button onclick="toggleDay(${i})" class="text-[9px] font-black px-3 py-2 rounded-xl border bg-white">${d.disabled ? 'ENABLE' : 'OFF'}</button></div>`;
+                cont.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        window.addSlot = async (i) => { const t = formatTimeInput(document.getElementById(`add-${i}`).value); if (!t) return; const up = {...currentWeeklySchedule}; if(!up[i]) up[i]={slots:[], disabled:false}; if(!up[i].slots.includes(t)) { up[i].slots.push(t); up[i].slots.sort(); await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { weeklySchedule: up }); } };
+        window.removeSlot = async (i, s) => { const up = {...currentWeeklySchedule}; up[i].slots = up[i].slots.filter(x => x !== s); await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { weeklySchedule: up }); };
+        window.toggleDay = async (i) => { const up = {...currentWeeklySchedule}; if(!up[i]) up[i]={slots:[], disabled:false}; up[i].disabled = !up[i].disabled; await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), { weeklySchedule: up }); };
+
+        function renderBookingsTable() {
+            const body = document.getElementById('tableBody'); body.innerHTML = '';
+            currentBookings.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)).forEach(item => {
+                const tr = document.createElement('tr'), styles = { confirmed: 'bg-green-100 text-green-700', cancelled: 'bg-red-100 text-red-700', requested: 'bg-amber-100 text-amber-700', completed: 'bg-indigo-100 text-indigo-700' };
+                tr.innerHTML = `<td><div class="font-bold text-xs">${item.scheduledDate}</div><div class="text-[10px] opacity-40 uppercase">${item.scheduledTime}</div></td><td><div class="font-bold text-xs">${item.studentFirstName}</div><div class="text-[9px] text-indigo-400 font-bold">${item.studentEmail}</div></td><td><p class="text-[10px] font-black text-slate-500">${item.course}</p></td><td><span class="status-badge ${styles[item.status]}">${item.status.toUpperCase()}</span></td><td class="text-right whitespace-nowrap"><div class="flex justify-end gap-1">${item.status === 'requested' ? `<button onclick="updateStatus('${item.id}','confirmed')" class="p-2 text-green-500"><i data-lucide="check-circle" class="w-4 h-4"></i></button>` : ''}${item.status === 'confirmed' ? `<button onclick="openInvoiceModal('${item.id}')" class="px-3 py-1 bg-indigo-600 text-white text-[9px] font-black rounded uppercase">Complete</button>` : ''}<button onclick="updateStatus('${item.id}','cancelled')" class="p-2 text-red-400"><i data-lucide="x-circle" class="w-4 h-4"></i></button><button onclick="deleteBooking('${item.id}')" class="p-2 text-slate-300"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td>`;
                 body.appendChild(tr);
             });
             lucide.createIcons();
         }
 
-        window.updateStatus = async (id, status) => { 
-            try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'bookings', id), { status }); 
-            } catch (e) { console.error("Update failed", e); }
-        };
-        
-        window.deleteRow = async (id) => { 
-            if (confirm("Permanently delete this record? This cannot be undone.")) {
-                try {
-                    // Force the path to be absolute within the artifact structure
-                    const targetDoc = doc(db, 'artifacts', appId, 'public', 'data', 'bookings', id);
-                    await deleteDoc(targetDoc);
-                } catch (e) {
-                    console.error("Delete operation failed:", e);
-                    alert("Delete failed. This may be due to a sync delay. Please try again in a moment.");
-                }
-            }
-        };
-        
-        window.changeAdminCal = (dir) => { adminCalMonth += dir; if(adminCalMonth>11){adminCalMonth=0; adminCalYear++} if(adminCalMonth<0){adminCalMonth=11; adminCalYear--} renderBlackoutCalendar(); };
+        let sFin = null; window.openInvoiceModal = (id) => { sFin = id; document.getElementById('invoiceModal').classList.remove('hidden'); updateModalTotal(); };
+        window.closeInvoiceModal = () => document.getElementById('invoiceModal').classList.add('hidden');
+        window.updateModalTotal = () => { document.getElementById('invTotalDisplay').innerText = `$${(parseFloat(document.getElementById('invHours').value || 0) * globalHourlyRate).toFixed(2)}`; };
+        window.submitCompletion = async () => { const h = parseFloat(document.getElementById('invHours').value), c = document.getElementById('invComments').value; await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'bookings', sFin), { status: 'completed', hours: h, tutorComments: c, totalBilled: h * globalHourlyRate }); closeInvoiceModal(); };
+        window.updateStatus = async (id, s) => { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'bookings', id), { status: s }); };
+        window.deleteBooking = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'bookings', id)); };
 
+        function renderChatSidebar() {
+            const bar = document.getElementById('chatSidebar'); bar.innerHTML = '';
+            currentChats.sort((a,b) => (b.lastUpdated?.seconds || 0) - (a.lastUpdated?.seconds || 0)).forEach(chat => {
+                const item = document.createElement('div'), last = chat.messages?.[chat.messages.length-1];
+                item.className = `chat-sidebar-item p-6 border-b border-slate-50 cursor-pointer hover:bg-slate-50 ${activeChatUid === chat.uid ? 'active' : ''}`;
+                item.onclick = () => { activeChatUid = chat.uid; renderAdminChat(); renderChatSidebar(); };
+                item.innerHTML = `<div class="flex justify-between items-start mb-1"><span class="font-bold text-sm text-slate-800 text-slate-900">${chat.studentName || 'Student'}</span>${last?.sender === 'student' ? '<span class="w-2 h-2 bg-indigo-500 rounded-full"></span>' : ''}</div><p class="text-[10px] text-slate-400 truncate">${last?.text || ''}</p>`;
+                bar.appendChild(item);
+            });
+        }
+
+        function renderAdminChat() {
+            const chat = currentChats.find(c => c.uid === activeChatUid); if (!chat) return;
+            document.getElementById('activeChatName').innerText = chat.studentName || 'Student'; document.getElementById('chatInputArea').classList.remove('hidden');
+            const cont = document.getElementById('adminChatMessages'); cont.innerHTML = '';
+            (chat.messages || []).forEach(m => { const div = document.createElement('div'); div.className = `p-4 max-w-[80%] text-xs font-medium shadow-sm ${m.sender === 'admin' ? 'msg-admin' : 'msg-student'}`; div.innerHTML = `<p>${m.text}</p><span class="block text-[8px] opacity-60 mt-1 text-right">${m.time}</span>`; cont.appendChild(div); });
+            cont.scrollTop = cont.scrollHeight;
+        }
+
+        window.sendAdminMessage = async () => {
+            const input = document.getElementById('adminChatInput'), msg = input.value.trim(); if (!msg || !activeChatUid) return;
+            const chat = currentChats.find(c => c.uid === activeChatUid);
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chats', activeChatUid), { messages: [...(chat.messages || []), { sender: 'admin', text: msg, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) }], lastUpdated: serverTimestamp() });
+            input.value = '';
+        }
+
+        window.changeAdminCal = (dir) => { adminCalMonth += dir; if(adminCalMonth>11){adminCalMonth=0; adminCalYear++} if(adminCalMonth<0){adminCalMonth=11; adminCalYear--} renderBlackoutCalendar(); };
+        window.scrollToSection = (id) => document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
     </script>
 </body>
 </html>
