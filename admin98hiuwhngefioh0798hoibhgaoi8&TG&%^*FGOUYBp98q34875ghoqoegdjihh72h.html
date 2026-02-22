@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutor Admin | Ashton Nursing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: sans-serif; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f4f4f4; font-size: 12px; text-transform: uppercase; color: #666; }
+        .btn { padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .btn-approve { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .btn-deny { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .btn-delete { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
+        .status-badge { padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+
+    <!-- Login Container -->
+    <div id="loginSection" class="max-w-sm mx-auto mt-20 bg-white p-6 rounded shadow-sm">
+        <h1 class="text-xl font-bold mb-4">Admin Login</h1>
+        <p class="text-xs text-gray-500 mb-4">Access restricted to Cole Ashton.</p>
+        <div class="space-y-3">
+            <input type="email" id="email" placeholder="Email" class="w-full p-2 border rounded">
+            <input type="password" id="password" placeholder="Password" class="w-full p-2 border rounded">
+            <button onclick="login()" id="loginBtn" class="w-full bg-blue-600 text-white p-2 rounded font-bold">Sign In</button>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard (Hidden by default) -->
+    <div id="adminDashboard" class="hidden max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">Appointment Management</h1>
+            <button onclick="logout()" class="text-red-500 text-sm font-bold underline">Log Out</button>
+        </div>
+
+        <div class="bg-white rounded shadow-sm overflow-hidden">
+            <table id="requestsTable">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Student Information</th>
+                        <th>Subject & Topics</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="6" class="text-center p-10 text-gray-400 italic">Loading requests...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRLarhK20JltsckgrZRVJBDt4A4FTkUSk",
+            authDomain: "coleashtontut.firebaseapp.com",
+            projectId: "coleashtontut",
+            storageBucket: "coleashtontut.firebasestorage.app",
+            messagingSenderId: "277509432126",
+            appId: "1:277509432126:web:08c3221cbf3d1336a3c26f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = "coleashtontut";
+        const ADMIN_EMAIL = "coleashton@gmail.com";
+
+        // Auth Logic
+        window.login = async () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            if (email !== ADMIN_EMAIL) return alert("Access Denied: Admin email required.");
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (e) {
+                alert("Login failed: " + e.message);
+            }
+        };
+
+        window.logout = () => signOut(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user && user.email === ADMIN_EMAIL) {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                initData();
+            } else {
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('adminDashboard').classList.add('hidden');
+            }
+        });
+
+        // Data Logic
+        function initData() {
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'bookings'));
+            onSnapshot(q, (snapshot) => {
+                const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderTable(data);
+            });
+        }
+
+        function renderTable(data) {
+            const body = document.getElementById('tableBody');
+            body.innerHTML = '';
+
+            // Sort by most recent request first
+            data.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                const statusColor = item.status === 'confirmed' ? 'bg-green-100 text-green-700' : 
+                                    item.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700';
+
+                tr.innerHTML = `
+                    <td>
+                        <div class="font-bold text-gray-900">${item.scheduledDate}</div>
+                        <div class="text-xs text-gray-500">${item.scheduledTime}</div>
+                    </td>
+                    <td>
+                        <div class="font-bold text-sm">${item.studentFirstName} ${item.studentLastName}</div>
+                        <div class="text-xs text-blue-600">${item.studentEmail}</div>
+                    </td>
+                    <td>
+                        <div class="font-bold text-xs text-indigo-700">${item.course}</div>
+                        <div class="text-xs text-gray-600 italic">${item.topics || 'No topics listed'}</div>
+                    </td>
+                    <td class="text-xs font-bold text-gray-400 text-center">${item.location}</td>
+                    <td>
+                        <span class="status-badge ${statusColor}">${item.status.toUpperCase()}</span>
+                    </td>
+                    <td>
+                        <div class="flex gap-2">
+                            ${item.status === 'requested' ? `
+                                <button onclick="updateStatus('${item.id}', 'confirmed')" class="btn btn-approve">Approve</button>
+                                <button onclick="updateStatus('${item.id}', 'cancelled')" class="btn btn-deny">Deny</button>
+                            ` : `
+                                <button onclick="deleteRow('${item.id}')" class="btn btn-delete">Remove</button>
+                            `}
+                        </div>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        window.updateStatus = async (id, status) => {
+            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'bookings', id);
+            await updateDoc(ref, { status });
+        };
+
+        window.deleteRow = async (id) => {
+            if (confirm("Delete this record permanently?")) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'bookings', id));
+            }
+        };
+    </script>
+</body>
+</html>
