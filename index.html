@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
         body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         .brand-font { font-family: 'Plus Jakarta Sans', sans-serif; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
@@ -17,10 +17,11 @@
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #4f46e5; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Chat Widget Styles */
-        #chatWidget { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .chat-bubble-user { background: #4f46e5; color: white; align-self: flex-end; border-radius: 12px 12px 0 12px; }
         .chat-bubble-admin { background: #f1f5f9; color: #1e293b; align-self: flex-start; border-radius: 12px 12px 12px 0; }
+        
+        /* Modern Modal backdrop */
+        .modal-backdrop { background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
@@ -34,11 +35,15 @@
             </div>
             <div class="hidden md:flex items-center gap-8 font-medium text-slate-600">
                 <a href="#services" class="hover:text-indigo-600 transition">Courses</a>
-                <a href="#my-sessions" id="navMySessions" class="hidden hover:text-indigo-600 transition">My Sessions</a>
-                <div id="userProfile">
-                    <button id="loginNavBtn" onclick="toggleAuthOverlay()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition">Sign In</button>
-                    <div id="userInfo" class="hidden flex items-center gap-3">
-                        <span id="userNameDisplay" class="text-sm font-bold"></span>
+                <a href="#schedule" class="hover:text-indigo-600 transition">Schedule</a>
+                <div id="userProfile" class="flex items-center gap-4">
+                    <button id="loginNavBtn" onclick="toggleAuthOverlay()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition font-bold text-sm">Sign In</button>
+                    <div id="userInfo" class="hidden flex items-center gap-4">
+                        <button onclick="toggleAppointmentsSuite()" class="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-black transition text-sm font-bold shadow-lg">
+                            <i data-lucide="layout-grid" class="w-4 h-4"></i> My Portal
+                        </button>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <span id="userNameDisplay" class="text-sm font-bold text-slate-700"></span>
                         <button onclick="handleSignOut()" class="text-xs text-red-500 font-bold hover:underline">Logout</button>
                     </div>
                 </div>
@@ -49,162 +54,185 @@
     <!-- Hero Section -->
     <header class="py-16 md:py-24 px-4 max-w-6xl mx-auto text-center">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 mb-8 text-sm font-semibold text-indigo-700 bg-indigo-50 rounded-full border border-indigo-100">
-            Specialized ADN Program Tutoring
+            Professional ADN Tutoring & Support
         </div>
         <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 mb-6 leading-tight brand-font">
-            Master Your Nursing Exams with <br><span class="text-indigo-600">Cole Ashton</span>
+            Master Nursing School with <br><span class="text-indigo-600">Personalized Mentorship</span>
         </h1>
         <p class="text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Personalized mentorship to help bridge the gap between textbook theory and clinical excellence.
+            From Pharmacology to Med-Surg, Cole Ashton helps you bridge the gap between classroom theory and clinical confidence.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#schedule" class="px-8 py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:scale-105 transition">
-                Reserve Your Time
+            <a href="#schedule" class="px-8 py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:scale-105 transition active:scale-95">
+                Reserve Your Session
             </a>
             <a href="#services" class="px-8 py-4 bg-white border border-slate-200 font-bold rounded-xl hover:bg-slate-50 transition">
-                View Subjects
+                Explore Subjects
             </a>
         </div>
     </header>
 
-    <!-- Courses Section (RE-ADDED) -->
-    <section id="services" class="py-20 bg-white">
+    <!-- Courses Section -->
+    <section id="services" class="py-24 bg-white">
         <div class="max-w-6xl mx-auto px-4">
             <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold mb-4 brand-font">Core ADN Tutoring Subjects</h2>
-                <div class="h-1 w-20 bg-indigo-600 mx-auto rounded-full"></div>
+                <h2 class="text-3xl font-extrabold mb-4 brand-font">Core ADN Tutoring Subjects</h2>
+                <p class="text-slate-500">Targeted review for every stage of your Associate Degree in Nursing</p>
+                <div class="h-1.5 w-20 bg-indigo-600 mx-auto mt-6 rounded-full"></div>
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="p-6 rounded-2xl border border-slate-100 bg-slate-50 hover:shadow-lg transition duration-300">
-                    <i data-lucide="book-open" class="w-8 h-8 text-indigo-600 mb-4"></i>
-                    <h3 class="text-lg font-bold mb-2">Introduction to Nursing</h3>
-                    <p class="text-sm text-slate-600">Building a strong foundation in nursing theory, ethics, and fundamentals.</p>
+                <div class="p-8 rounded-3xl border border-slate-100 bg-slate-50 hover:shadow-xl hover:border-indigo-100 transition duration-300 group">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-indigo-600 transition duration-300">
+                        <i data-lucide="book-open" class="text-indigo-600 group-hover:text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Introduction to Nursing</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">Fundamental concepts, nursing theory, and establishing professional standards.</p>
                 </div>
-                <div class="p-6 rounded-2xl border border-slate-100 bg-slate-50 hover:shadow-lg transition duration-300">
-                    <i data-lucide="activity" class="w-8 h-8 text-indigo-600 mb-4"></i>
-                    <h3 class="text-lg font-bold mb-2">Health Assessment</h3>
-                    <p class="text-sm text-slate-600">Mastering physical exam techniques and clinical findings.</p>
+                <div class="p-8 rounded-3xl border border-slate-100 bg-slate-50 hover:shadow-xl hover:border-indigo-100 transition duration-300 group">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-indigo-600 transition duration-300">
+                        <i data-lucide="activity" class="text-indigo-600 group-hover:text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Health Assessment</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">Mastering physical examination techniques and clinical data interpretation.</p>
                 </div>
-                <div class="p-6 rounded-2xl border border-slate-100 bg-slate-50 hover:shadow-lg transition duration-300">
-                    <i data-lucide="heart-pulse" class="w-8 h-8 text-indigo-600 mb-4"></i>
-                    <h3 class="text-lg font-bold mb-2">Adult Health I & II</h3>
-                    <p class="text-sm text-slate-600">Med-Surg mastery including complex pathophysiology and interventions.</p>
+                <div class="p-8 rounded-3xl border border-slate-100 bg-slate-50 hover:shadow-xl hover:border-indigo-100 transition duration-300 group">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-indigo-600 transition duration-300">
+                        <i data-lucide="heart-pulse" class="text-indigo-600 group-hover:text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Adult Health I & II</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">Comprehensive Med-Surg nursing including complex pathophysiology.</p>
                 </div>
-                <div class="p-6 rounded-2xl border border-slate-100 bg-slate-50 hover:shadow-lg transition duration-300">
-                    <i data-lucide="pill" class="w-8 h-8 text-indigo-600 mb-4"></i>
-                    <h3 class="text-lg font-bold mb-2">Pharmacology</h3>
-                    <p class="text-sm text-slate-600">Drug classifications, mechanisms, and dosage calculations.</p>
+                <div class="p-8 rounded-3xl border border-slate-100 bg-slate-50 hover:shadow-xl hover:border-indigo-100 transition duration-300 group">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-indigo-600 transition duration-300">
+                        <i data-lucide="pill" class="text-indigo-600 group-hover:text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Pharmacology</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">Classifications, mechanisms, side effects, and safe dosage calculations.</p>
                 </div>
-                <div class="p-6 rounded-2xl border border-slate-100 bg-slate-50 hover:shadow-lg transition duration-300">
-                    <i data-lucide="brain" class="w-8 h-8 text-indigo-600 mb-4"></i>
-                    <h3 class="text-lg font-bold mb-2">Mental Health</h3>
-                    <p class="text-sm text-slate-600">Psychosocial nursing and management of psychiatric conditions.</p>
+                <div class="p-8 rounded-3xl border border-slate-100 bg-slate-50 hover:shadow-xl hover:border-indigo-100 transition duration-300 group">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-indigo-600 transition duration-300">
+                        <i data-lucide="brain" class="text-indigo-600 group-hover:text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Mental Health</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">Psychosocial interventions and management of psychiatric disorders.</p>
                 </div>
-                <div class="p-6 rounded-2xl border border-slate-100 bg-slate-50 hover:shadow-lg transition duration-300">
-                    <i data-lucide="baby" class="w-8 h-8 text-indigo-600 mb-4"></i>
-                    <h3 class="text-lg font-bold mb-2">Maternal Newborn</h3>
-                    <p class="text-sm text-slate-600">Comprehensive care for the childbearing family and neonates.</p>
+                <div class="p-8 rounded-3xl border border-slate-100 bg-slate-50 hover:shadow-xl hover:border-indigo-100 transition duration-300 group">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-indigo-600 transition duration-300">
+                        <i data-lucide="baby" class="text-indigo-600 group-hover:text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Maternal Newborn</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">Care for the childbearing family, labor/delivery, and neonates.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- My Appointments Section -->
-    <section id="my-sessions" class="py-20 bg-slate-100 hidden">
-        <div class="max-w-5xl mx-auto px-4">
-            <div class="flex items-center justify-between mb-8">
-                <h2 class="text-3xl font-bold brand-font">My Scheduled Sessions</h2>
-                <div class="bg-indigo-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest" id="sessionCount">0 Sessions</div>
+    <!-- Appointments Suite Modal -->
+    <div id="appointmentsSuite" class="fixed inset-0 z-[150] modal-backdrop flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-4xl max-h-[85vh] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+            <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white">
+                <div>
+                    <h2 class="text-2xl font-extrabold brand-font">Student Dashboard</h2>
+                    <p class="text-xs text-indigo-400 font-bold uppercase tracking-widest mt-1">Manage your sessions & invoices</p>
+                </div>
+                <button onclick="toggleAppointmentsSuite()" class="p-2 hover:bg-slate-800 rounded-xl transition"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
-            <div id="studentAppointmentsList" class="grid gap-4">
-                <!-- Populated by JS -->
-                <div class="bg-white p-12 rounded-3xl text-center text-slate-400 italic border-2 border-dashed border-slate-200">
-                    No sessions booked yet. Start by selecting a date below!
+            <div class="flex-1 overflow-y-auto p-8 bg-slate-50">
+                <div id="studentAppointmentsList" class="grid gap-4">
+                    <!-- Loaded by JS -->
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
     <!-- Scheduling Section -->
     <section id="schedule" class="py-20 bg-slate-50">
         <div class="max-w-5xl mx-auto px-4">
-            <div class="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200 flex flex-col md:flex-row">
+            <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-200 flex flex-col md:flex-row">
                 
                 <!-- Sidebar -->
-                <div class="md:w-1/3 bg-slate-900 p-10 text-white">
+                <div class="md:w-1/3 bg-slate-900 p-12 text-white flex flex-col">
                     <div class="flex items-center gap-3 mb-10">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center font-bold shadow-lg shadow-indigo-500/20">CA</div>
-                        <div><p class="font-bold brand-font text-lg">Cole Ashton</p><p class="text-xs text-indigo-400">ADN Mentor</p></div>
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-500/20">CA</div>
+                        <div><p class="font-bold brand-font text-lg">Cole Ashton</p><p class="text-xs text-indigo-400 font-bold uppercase tracking-tighter">ADN Mentor</p></div>
                     </div>
-                    <h3 class="text-2xl font-bold mb-8 brand-font">1-on-1 Review</h3>
-                    <div class="space-y-5 mb-10">
+                    <h3 class="text-3xl font-extrabold mb-8 brand-font">1-on-1 Review</h3>
+                    <div class="space-y-6 mb-12">
                         <div class="flex items-center gap-4 text-slate-300">
                             <i data-lucide="clock" class="w-5 h-5 text-indigo-400"></i>
-                            <span>60-Minute Session</span>
+                            <span class="font-medium">60-Minute Session</span>
                         </div>
                         <div class="flex items-center gap-4 text-slate-300">
                             <i data-lucide="video" class="w-5 h-5 text-indigo-400"></i>
-                            <span id="displayLocation">Default: ONLINE</span>
+                            <span class="font-medium">Video Meeting (Google Meet)</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-slate-300">
+                            <i data-lucide="map-pin" class="w-5 h-5 text-indigo-400"></i>
+                            <span class="font-medium italic">Online - Link sent immediately</span>
                         </div>
                     </div>
-                    <p class="text-sm text-slate-400 italic border-t border-slate-800 pt-8">"Nursing school is tough, but you don't have to navigate it alone."</p>
+                    <div class="mt-auto pt-8 border-t border-slate-800">
+                        <p class="text-sm text-slate-400 italic">"Nursing school is tough, but you don't have to navigate it alone."</p>
+                    </div>
                 </div>
 
                 <!-- Calendar Logic -->
-                <div class="md:w-2/3 p-10 relative">
-                    <div id="bookingLock" class="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-8 text-center">
-                        <i data-lucide="lock" class="w-8 h-8 text-indigo-600 mb-4"></i>
-                        <h4 class="text-xl font-bold mb-2">Sign in to Schedule</h4>
-                        <p class="text-slate-500 text-sm mb-6">You need an account to book sessions.</p>
-                        <button onclick="toggleAuthOverlay()" class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg">Sign In Now</button>
+                <div class="md:w-2/3 p-12 relative">
+                    <div id="bookingLock" class="absolute inset-0 bg-white/70 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-8 text-center">
+                        <div class="bg-indigo-50 p-4 rounded-full mb-4">
+                            <i data-lucide="lock" class="w-8 h-8 text-indigo-600"></i>
+                        </div>
+                        <h4 class="text-2xl font-extrabold mb-2 brand-font">Sign in to Schedule</h4>
+                        <p class="text-slate-500 mb-8 max-w-xs">You must be logged in to view availability and reserve your time.</p>
+                        <button onclick="toggleAuthOverlay()" class="px-8 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-xl hover:bg-indigo-700 transition">Sign In Now</button>
                     </div>
 
                     <div id="step-1">
-                        <div class="mb-6 flex items-center justify-between">
-                            <p class="font-bold text-slate-700" id="monthDisplay">Loading Calendar...</p>
+                        <div class="mb-8 flex items-center justify-between">
+                            <p class="text-xl font-extrabold text-slate-800 brand-font" id="monthDisplay">Loading...</p>
                             <div class="flex gap-2">
-                                <button onclick="changeMonth(-1)" class="p-2 hover:bg-slate-100 rounded-lg transition"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
-                                <button onclick="changeMonth(1)" class="p-2 hover:bg-slate-100 rounded-lg transition"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                                <button onclick="changeMonth(-1)" class="p-2 hover:bg-slate-100 rounded-xl transition"><i data-lucide="chevron-left" class="w-6 h-6 text-slate-400"></i></button>
+                                <button onclick="changeMonth(1)" class="p-2 hover:bg-slate-100 rounded-xl transition"><i data-lucide="chevron-right" class="w-6 h-6 text-slate-400"></i></button>
                             </div>
                         </div>
-                        <div class="calendar-grid mb-2 text-[10px] font-bold text-slate-400 text-center uppercase tracking-widest">
-                            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                        <div class="calendar-grid mb-2 text-[10px] font-black text-slate-400 text-center uppercase tracking-[0.2em] pb-2">
+                            <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
                         </div>
-                        <div class="calendar-grid gap-1 mb-8" id="calendarDays"></div>
+                        <div class="calendar-grid gap-1 mb-10" id="calendarDays"></div>
 
-                        <div id="timeSelection" class="hidden">
-                            <h4 class="text-lg font-bold mb-5 brand-font">Available Start Times</h4>
+                        <div id="timeSelection" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <h4 class="text-lg font-bold mb-5 brand-font text-slate-900 border-t border-slate-100 pt-8">Select a Time</h4>
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="timeSlots"></div>
-                            <button onclick="nextStep()" class="w-full mt-10 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-xl hover:bg-indigo-700 transition">
-                                Continue
+                            <button onclick="nextStep()" class="w-full mt-10 py-4 bg-indigo-600 text-white font-extrabold rounded-2xl shadow-xl hover:bg-indigo-700 transition active:scale-[0.98]">
+                                Continue to Information
                             </button>
                         </div>
                     </div>
 
                     <div id="step-2" class="hidden">
-                        <button onclick="prevStep()" class="text-indigo-600 font-bold mb-8 flex items-center gap-2 hover:translate-x-[-2px] transition">
+                        <button onclick="prevStep()" class="text-indigo-600 font-bold mb-10 flex items-center gap-2 group hover:translate-x-[-4px] transition">
                             <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Calendar
                         </button>
-                        <h4 class="text-xl font-bold mb-8 brand-font">Confirm Details</h4>
-                        <div class="space-y-4">
+                        <h4 class="text-2xl font-extrabold mb-8 brand-font">Finalize Session</h4>
+                        <div class="space-y-6">
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="space-y-1">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">First Name</label>
-                                    <input type="text" id="bookingFirstName" placeholder="Jane" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">First Name</label>
+                                    <input type="text" id="bookingFirstName" placeholder="Jane" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
                                 </div>
-                                <div class="space-y-1">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last Name</label>
-                                    <input type="text" id="bookingLastName" placeholder="Doe" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Last Name</label>
+                                    <input type="text" id="bookingLastName" placeholder="Doe" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
                                 </div>
                             </div>
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Location</label>
-                                <input type="text" id="bookingLocation" value="ONLINE" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Session Location</label>
+                                <input type="text" id="bookingLocation" value="ONLINE" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
                             </div>
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Course</label>
-                                <select id="bookingCourse" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Review Course</label>
+                                <select id="bookingCourse" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition appearance-none">
                                     <option>Introduction to Nursing</option>
                                     <option>Health Assessment</option>
                                     <option>Adult Health I</option>
@@ -214,12 +242,12 @@
                                     <option>Maternal Newborn Health</option>
                                 </select>
                             </div>
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">What needs to be covered?</label>
-                                <textarea id="bookingTopics" rows="3" placeholder="Topics, specific drugs, or skills..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition"></textarea>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">What needs to be covered?</label>
+                                <textarea id="bookingTopics" rows="3" placeholder="Specific topics or clinical skills..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition"></textarea>
                             </div>
-                            <button id="finalBookBtn" onclick="handleBooking()" class="w-full py-4 bg-indigo-900 text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-900 transition mt-6 shadow-xl">
-                                <span>Book This Slot</span>
+                            <button id="finalBookBtn" onclick="handleBooking()" class="w-full py-4 bg-indigo-900 text-white font-extrabold rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-900 transition mt-6 shadow-2xl">
+                                <span>Request Session</span>
                                 <div id="bookingLoader" class="loader hidden border-white/30 border-t-white"></div>
                             </button>
                         </div>
@@ -231,41 +259,49 @@
 
     <!-- Chat Widget -->
     <div id="chatContainer" class="fixed bottom-6 right-6 z-[100] hidden">
-        <div id="chatWindow" class="hidden bg-white w-80 h-96 rounded-3xl shadow-2xl flex flex-col overflow-hidden mb-4 border border-slate-200 animate-in slide-in-from-bottom-4 duration-300">
-            <div class="bg-indigo-600 p-4 text-white flex justify-between items-center">
+        <div id="chatWindow" class="hidden bg-white w-80 h-96 rounded-[2rem] shadow-2xl flex flex-col overflow-hidden mb-4 border border-slate-200 animate-in slide-in-from-bottom-4 duration-300">
+            <div class="bg-indigo-600 p-5 text-white flex justify-between items-center">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <span class="font-bold text-sm">Chat with Cole</span>
                 </div>
-                <button onclick="toggleChatWindow()" class="hover:bg-indigo-500 rounded p-1"><i data-lucide="x" class="w-4 h-4"></i></button>
+                <button onclick="toggleChatWindow()" class="hover:bg-indigo-500 rounded-lg p-1.5 transition"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 text-xs">
-                <!-- Messages JS -->
-                <p class="text-center text-slate-400 italic py-4">Questions about your session? Send me a message below.</p>
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 text-xs bg-slate-50">
+                <p class="text-center text-slate-400 italic py-4">Direct message Cole regarding your sessions.</p>
             </div>
-            <div class="p-3 border-t flex gap-2">
-                <input type="text" id="chatInput" placeholder="Type a message..." class="flex-1 bg-slate-50 border-none outline-none p-2 rounded-xl text-xs" onkeydown="if(event.key === 'Enter') sendChatMessage()">
-                <button onclick="sendChatMessage()" class="bg-indigo-600 text-white p-2 rounded-xl"><i data-lucide="send" class="w-4 h-4"></i></button>
+            <div class="p-3 bg-white border-t flex gap-2">
+                <input type="text" id="chatInput" placeholder="Type a message..." class="flex-1 bg-slate-50 border-none outline-none p-3 rounded-xl text-xs" onkeydown="if(event.key === 'Enter') sendChatMessage()">
+                <button onclick="sendChatMessage()" class="bg-indigo-600 text-white p-3 rounded-xl hover:bg-indigo-700 transition"><i data-lucide="send" class="w-4 h-4"></i></button>
             </div>
         </div>
-        <button onclick="toggleChatWindow()" class="bg-indigo-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition active:scale-95">
-            <i data-lucide="message-circle" class="w-6 h-6"></i>
+        <button onclick="toggleChatWindow()" id="chatToggleButton" class="bg-indigo-600 text-white w-16 h-16 rounded-3xl shadow-2xl flex items-center justify-center hover:scale-110 transition active:scale-95 relative overflow-visible">
+            <i data-lucide="message-circle" class="w-7 h-7"></i>
+            <!-- Notification Badge -->
+            <div id="chatBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white rounded-full hidden flex items-center justify-center">
+                <span class="text-[8px] font-black">!</span>
+            </div>
         </button>
     </div>
 
     <!-- Auth Modal -->
-    <div id="authOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[200] hidden p-4">
+    <div id="authOverlay" class="fixed inset-0 z-[200] modal-backdrop flex items-center justify-center hidden p-4">
         <div class="bg-white p-10 rounded-[2.5rem] max-w-md w-full text-center shadow-2xl animate-in zoom-in-95 duration-300">
-            <h3 class="text-2xl font-bold mb-6 brand-font">Sign In to Mentor</h3>
+            <div class="bg-indigo-600 p-4 rounded-3xl w-16 h-16 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-100 text-white">
+                <i data-lucide="user-check" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-2xl font-extrabold mb-2 brand-font">Join the Program</h3>
+            <p class="text-slate-500 text-sm mb-8">Sign in to book sessions and chat with Cole.</p>
             <div class="space-y-4">
-                <button onclick="handleGoogleSignIn()" class="w-full py-4 border border-slate-200 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition">
-                    <i data-lucide="mail" class="w-4 h-4"></i> Continue with Google
+                <button onclick="handleGoogleSignIn()" class="w-full py-4 border-2 border-slate-100 rounded-2xl font-extrabold flex items-center justify-center gap-3 hover:bg-slate-50 transition">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    Continue with Google
                 </button>
-                <div class="relative py-2"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-100"></div></div><div class="relative flex justify-center text-[10px] uppercase"><span class="bg-white px-2 text-slate-400">Or Email</span></div></div>
-                <input type="email" id="authEmail" placeholder="Email" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none">
-                <input type="password" id="authPassword" placeholder="Password" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none">
-                <button onclick="handleEmailAuth()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg">Sign In / Sign Up</button>
-                <button onclick="toggleAuthOverlay()" class="text-slate-400 text-sm hover:text-slate-600 transition">Cancel</button>
+                <div class="relative py-2"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-100"></div></div><div class="relative flex justify-center text-[10px] uppercase font-black tracking-[0.2em]"><span class="bg-white px-3 text-slate-400">Or Email</span></div></div>
+                <input type="email" id="authEmail" placeholder="Email Address" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                <input type="password" id="authPassword" placeholder="Password" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                <button onclick="handleEmailAuth()" class="w-full py-4 bg-indigo-600 text-white font-extrabold rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition">Sign In / Sign Up</button>
+                <button onclick="toggleAuthOverlay()" class="text-slate-400 text-xs font-bold hover:text-slate-600 transition">Maybe Later</button>
             </div>
         </div>
     </div>
@@ -289,6 +325,7 @@
         let currentViewYear = new Date().getFullYear();
         let adminSettings = { weeklySchedule: {}, blackoutDates: [] };
         let userSessions = [];
+        let chatMessagesLocal = [];
 
         lucide.createIcons();
 
@@ -307,11 +344,11 @@
             document.getElementById('loginNavBtn').classList.toggle('hidden', isLogged);
             document.getElementById('userInfo').classList.toggle('hidden', !isLogged);
             document.getElementById('bookingLock').classList.toggle('hidden', isLogged);
-            document.getElementById('navMySessions').classList.toggle('hidden', !isLogged);
-            document.getElementById('my-sessions').classList.toggle('hidden', !isLogged);
             document.getElementById('chatContainer').classList.toggle('hidden', !isLogged);
-
-            if (user) {
+            
+            // Fix: Automatically hide login overlay if user is logged in
+            if (isLogged) {
+                document.getElementById('authOverlay').classList.add('hidden');
                 document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
                 if (user.displayName) {
                     const parts = user.displayName.split(' ');
@@ -323,7 +360,7 @@
         });
 
         function initUserData() {
-            // Fetch User Specific Sessions (Public but filtered by studentUid in JS)
+            // Fetch User Specific Sessions
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'bookings')), (snapshot) => {
                 userSessions = snapshot.docs
                     .map(d => ({ id: d.id, ...d.data() }))
@@ -331,23 +368,36 @@
                 renderUserSessions();
             });
 
-            // Chat Logic (Private Data per User)
+            // Chat Logic & Notification Listener
             onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'chats', currentUser.uid), (docSnap) => {
-                if (docSnap.exists()) renderChatMessages(docSnap.data().messages || []);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    chatMessagesLocal = data.messages || [];
+                    renderChatMessages(chatMessagesLocal);
+                    
+                    // Notification Logic: Check if last message is from admin and window is closed
+                    const lastMsg = chatMessagesLocal[chatMessagesLocal.length - 1];
+                    const isChatClosed = document.getElementById('chatWindow').classList.contains('hidden');
+                    if (lastMsg && lastMsg.sender === 'admin' && isChatClosed) {
+                        document.getElementById('chatBadge').classList.remove('hidden');
+                    }
+                }
             });
         }
 
+        window.toggleAppointmentsSuite = () => document.getElementById('appointmentsSuite').classList.toggle('hidden');
+
         function renderUserSessions() {
             const list = document.getElementById('studentAppointmentsList');
-            const count = document.getElementById('sessionCount');
-            count.innerText = `${userSessions.length} Session${userSessions.length === 1 ? '' : 's'}`;
-            
-            if (userSessions.length === 0) return;
+            if (userSessions.length === 0) {
+                list.innerHTML = '<div class="bg-white p-12 rounded-3xl text-center text-slate-400 italic">No sessions found. Request your first session below!</div>';
+                return;
+            }
             
             list.innerHTML = '';
             userSessions.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)).forEach(session => {
                 const div = document.createElement('div');
-                div.className = "bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition hover:shadow-md";
+                div.className = "bg-white p-6 rounded-3xl border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4";
                 
                 const statusStyles = {
                     'requested': 'bg-amber-100 text-amber-600',
@@ -358,25 +408,17 @@
 
                 div.innerHTML = `
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
-                            <i data-lucide="calendar"></i>
-                        </div>
+                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400"><i data-lucide="calendar"></i></div>
                         <div>
                             <p class="font-bold text-slate-900">${session.scheduledDate} @ ${session.scheduledTime}</p>
-                            <p class="text-xs font-bold text-indigo-500 uppercase tracking-wider">${session.course}</p>
+                            <p class="text-xs font-bold text-indigo-600 uppercase tracking-widest">${session.course}</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-6">
-                        <div class="text-right hidden md:block">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Location</p>
-                            <p class="text-xs font-bold">${session.location}</p>
-                        </div>
+                    <div class="flex items-center gap-4 ml-auto md:ml-0">
                         <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${statusStyles[session.status] || 'bg-slate-100'}">
                             ${session.status.toUpperCase()}
                         </span>
-                        ${session.status === 'completed' ? `
-                            <button onclick="showInvoice('${session.id}')" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition">INVOICE</button>
-                        ` : ''}
+                        ${session.status === 'completed' ? `<button onclick="showInvoice('${session.id}')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-bold">RECEIPT</button>` : ''}
                     </div>
                 `;
                 list.appendChild(div);
@@ -387,34 +429,24 @@
         window.showInvoice = (id) => {
             const session = userSessions.find(s => s.id === id);
             const modal = document.createElement('div');
-            modal.className = "fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[300] flex items-center justify-center p-4";
+            modal.className = "fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[300] flex items-center justify-center p-4";
             modal.innerHTML = `
-                <div class="bg-white w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
-                    <div class="bg-slate-900 p-8 text-white flex justify-between items-center">
-                        <div>
-                            <p class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Session Invoice</p>
-                            <h3 class="text-2xl font-bold brand-font">Cole Ashton Tutoring</h3>
-                        </div>
-                        <i data-lucide="check-circle-2" class="text-indigo-500 w-8 h-8"></i>
+                <div class="bg-white w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+                    <div class="bg-indigo-600 p-8 text-white">
+                        <h3 class="text-2xl font-black brand-font uppercase">Invoice</h3>
+                        <p class="text-xs font-bold opacity-70">Cole Ashton Tutoring</p>
                     </div>
-                    <div class="p-8 space-y-6">
-                        <div class="flex justify-between items-end border-b border-slate-100 pb-4">
-                            <span class="text-xs text-slate-400 font-bold uppercase">Course & Date</span>
-                            <span class="font-bold text-slate-900 text-sm text-right">${session.course}<br><small class="text-slate-500">${session.scheduledDate}</small></span>
+                    <div class="p-8 space-y-4">
+                        <div class="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest"><span>Course</span><span class="text-slate-900">${session.course}</span></div>
+                        <div class="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest"><span>Date</span><span class="text-slate-900">${session.scheduledDate}</span></div>
+                        <div class="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest"><span>Topics</span><span class="text-slate-900 italic text-right max-w-[120px]">${session.topics || 'Standard Review'}</span></div>
+                        <div class="pt-6 border-t border-slate-100">
+                            <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center">
+                                <span class="font-black text-slate-900">STATUS</span>
+                                <span class="text-green-600 font-black">PAID</span>
+                            </div>
                         </div>
-                        <div class="flex justify-between items-end border-b border-slate-100 pb-4">
-                            <span class="text-xs text-slate-400 font-bold uppercase">Tutor</span>
-                            <span class="font-bold text-slate-900 text-sm">Cole Ashton</span>
-                        </div>
-                        <div class="flex justify-between items-end border-b border-slate-100 pb-4">
-                            <span class="text-xs text-slate-400 font-bold uppercase">Topics Covered</span>
-                            <span class="text-xs font-medium text-slate-600 text-right max-w-[150px] italic">${session.topics || 'Standard Review'}</span>
-                        </div>
-                        <div class="bg-slate-50 p-6 rounded-2xl flex justify-between items-center">
-                            <span class="font-bold brand-font">Status</span>
-                            <span class="bg-green-100 text-green-700 px-4 py-1 rounded-full text-xs font-black">PAID / COMPLETED</span>
-                        </div>
-                        <button onclick="this.closest('.fixed').remove()" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl">Close Receipt</button>
+                        <button onclick="this.closest('.fixed').remove()" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl mt-4">Close Window</button>
                     </div>
                 </div>
             `;
@@ -423,24 +455,26 @@
         }
 
         // Chat Logic
-        window.toggleChatWindow = () => document.getElementById('chatWindow').classList.toggle('hidden');
+        window.toggleChatWindow = () => {
+            const win = document.getElementById('chatWindow');
+            win.classList.toggle('hidden');
+            if (!win.classList.contains('hidden')) {
+                document.getElementById('chatBadge').classList.add('hidden');
+                document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+            }
+        };
         
         window.sendChatMessage = async () => {
             const input = document.getElementById('chatInput');
             const msg = input.value.trim();
             if (!msg || !currentUser) return;
-            
             const chatRef = doc(db, 'artifacts', appId, 'public', 'data', 'chats', currentUser.uid);
-            const chatDoc = await setDoc(chatRef, { 
+            await setDoc(chatRef, { 
                 lastUpdated: serverTimestamp(),
                 studentName: `${document.getElementById('bookingFirstName').value} ${document.getElementById('bookingLastName').value}`,
                 studentEmail: currentUser.email,
-                messages: [
-                    ...(userSessions.messages || []), // Placeholder - we need the current list from Firestore
-                    { sender: 'student', text: msg, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }
-                ]
+                messages: [...chatMessagesLocal, { sender: 'student', text: msg, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) }]
             }, { merge: true });
-            
             input.value = '';
         }
 
@@ -449,14 +483,14 @@
             container.innerHTML = '';
             messages.forEach(m => {
                 const div = document.createElement('div');
-                div.className = `p-3 max-w-[85%] text-xs font-medium ${m.sender === 'student' ? 'chat-bubble-user' : 'chat-bubble-admin shadow-sm border border-slate-100'}`;
+                div.className = `p-3 max-w-[85%] text-[11px] font-bold ${m.sender === 'student' ? 'chat-bubble-user' : 'chat-bubble-admin shadow-sm border border-slate-200'}`;
                 div.innerHTML = `<p>${m.text}</p><span class="block text-[8px] opacity-60 mt-1 text-right">${m.time}</span>`;
                 container.appendChild(div);
             });
             container.scrollTop = container.scrollHeight;
         }
 
-        // Calendar Gen
+        // Calendar Logic
         window.generateCalendar = () => {
             const calendarDays = document.getElementById('calendarDays');
             calendarDays.innerHTML = '';
@@ -474,13 +508,13 @@
                 const isUnavailable = dayData.disabled || (dayData.slots || []).length === 0;
                 const dayBtn = document.createElement('button');
                 dayBtn.innerText = i;
-                dayBtn.className = "p-3 text-sm font-semibold rounded-2xl hover:bg-indigo-50 transition border border-transparent";
+                dayBtn.className = "p-3 text-sm font-bold rounded-2xl hover:bg-indigo-50 transition border border-transparent";
                 if (dayDate < today || isBlackout || isUnavailable) {
                     dayBtn.className += " text-slate-300 pointer-events-none";
                 } else {
                     dayBtn.onclick = () => {
-                        document.querySelectorAll('#calendarDays button').forEach(b => b.classList.remove('bg-indigo-600', 'text-white'));
-                        dayBtn.classList.add('bg-indigo-600', 'text-white');
+                        document.querySelectorAll('#calendarDays button').forEach(b => b.classList.remove('bg-indigo-600', 'text-white', 'shadow-xl'));
+                        dayBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-xl');
                         selectedDate = dateStr;
                         renderTimeSlots();
                     };
@@ -495,8 +529,6 @@
             document.getElementById('timeSelection').classList.remove('hidden');
             const dayOfWeek = new Date(selectedDate + "T12:00:00").getDay();
             const availableSlots = adminSettings.weeklySchedule?.[dayOfWeek]?.slots || [];
-            
-            // We fetch all public bookings to block ones that are NOT cancelled
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'bookings')), (snap) => {
                 const allBookings = snap.docs.map(d => d.data());
                 container.innerHTML = '';
@@ -504,7 +536,7 @@
                     const isTaken = allBookings.some(b => b.scheduledDate === selectedDate && b.scheduledTime === time && b.status !== 'cancelled');
                     const btn = document.createElement('button');
                     btn.innerText = time;
-                    btn.className = `time-slot border border-slate-200 py-3 px-4 rounded-xl text-sm font-semibold transition ${isTaken ? 'disabled bg-slate-100 opacity-50' : 'bg-slate-50'}`;
+                    btn.className = `time-slot border border-slate-200 py-4 px-4 rounded-2xl text-xs font-black transition ${isTaken ? 'disabled bg-slate-100 opacity-50' : 'bg-slate-50'}`;
                     if (!isTaken) {
                         btn.onclick = () => {
                             document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected', 'bg-indigo-600', 'text-white'));
@@ -521,7 +553,7 @@
             if (!currentUser) return;
             const fName = document.getElementById('bookingFirstName').value;
             const lName = document.getElementById('bookingLastName').value;
-            if (!fName || !lName || !selectedTime) return alert("Fill all details.");
+            if (!fName || !lName || !selectedTime) return alert("Please fill in all required details.");
             document.getElementById('finalBookBtn').disabled = true;
             document.getElementById('bookingLoader').classList.remove('hidden');
             try {
@@ -534,21 +566,27 @@
                     scheduledDate: selectedDate, scheduledTime: selectedTime,
                     timestamp: serverTimestamp(), status: 'requested'
                 });
+                alert("Booking request sent! Check your Portal for updates.");
                 location.reload();
-            } catch (e) { alert("Failed."); document.getElementById('finalBookBtn').disabled = false; }
+            } catch (e) { alert("Failed to book."); document.getElementById('finalBookBtn').disabled = false; }
         };
 
         window.toggleAuthOverlay = () => document.getElementById('authOverlay').classList.toggle('hidden');
         window.changeMonth = (dir) => { currentViewMonth += dir; if(currentViewMonth>11){currentViewMonth=0;currentViewYear++} if(currentViewMonth<0){currentViewMonth=11;currentViewYear--} generateCalendar(); };
         window.nextStep = () => { if(selectedDate && selectedTime){ document.getElementById('step-1').classList.add('hidden'); document.getElementById('step-2').classList.remove('hidden'); } };
         window.prevStep = () => { document.getElementById('step-2').classList.add('hidden'); document.getElementById('step-1').classList.remove('hidden'); };
-        window.handleGoogleSignIn = () => signInWithPopup(auth, new GoogleAuthProvider());
+        
+        window.handleGoogleSignIn = async () => {
+            try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (err) { alert(err.message); }
+        };
+        
         window.handleEmailAuth = async () => {
             const e = document.getElementById('authEmail').value;
             const p = document.getElementById('authPassword').value;
             if (!e || !p) return;
             try { await signInWithEmailAndPassword(auth, e, p); } catch (err) { if(err.code === 'auth/user-not-found') await createUserWithEmailAndPassword(auth, e, p); else alert(err.message); }
         };
+        
         window.handleSignOut = () => signOut(auth).then(() => location.reload());
 
         generateCalendar();
