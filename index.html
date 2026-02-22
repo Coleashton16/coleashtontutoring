@@ -285,20 +285,35 @@
                         </button>
                         <h4 class="text-xl font-bold mb-8 brand-font text-slate-900">Confirm Your Session</h4>
                         <div class="space-y-5">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">First Name</label>
+                                    <input type="text" id="bookingFirstName" placeholder="Jane" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Last Name</label>
+                                    <input type="text" id="bookingLastName" placeholder="Doe" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                                </div>
+                            </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Contact Name</label>
-                                <input type="text" id="bookingName" placeholder="Your Name" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Session Location</label>
+                                <input type="text" id="bookingLocation" value="ONLINE" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Primary Course for Review</label>
                                 <select id="bookingCourse" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
                                     <option>Introduction to Nursing</option>
                                     <option>Health Assessment</option>
-                                    <option>Adult Health I / II</option>
+                                    <option>Adult Health I</option>
+                                    <option>Adult Health II</option>
                                     <option>Pharmacology</option>
                                     <option>Mental Health</option>
                                     <option>Maternal Newborn Health</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">What needs to be covered?</label>
+                                <textarea id="bookingTopics" rows="3" placeholder="E.g. Electrolyte imbalances, heart failure medications, etc." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"></textarea>
                             </div>
                             <button id="finalBookBtn" onclick="handleBooking()" class="w-full py-4 bg-indigo-900 text-white font-bold rounded-2xl shadow-xl hover:bg-slate-900 transition mt-6 flex items-center justify-center gap-2">
                                 <span>Book This Slot</span>
@@ -389,7 +404,11 @@
             document.getElementById('authOverlay').classList.add('hidden');
             if (user) {
                 document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
-                if (user.displayName) document.getElementById('bookingName').value = user.displayName;
+                if (user.displayName) {
+                    const nameParts = user.displayName.split(' ');
+                    document.getElementById('bookingFirstName').value = nameParts[0] || '';
+                    document.getElementById('bookingLastName').value = nameParts.slice(1).join(' ') || '';
+                }
             }
         });
 
@@ -498,11 +517,14 @@
 
         window.handleBooking = async () => {
             if (!currentUser) return;
-            const name = document.getElementById('bookingName').value;
+            const firstName = document.getElementById('bookingFirstName').value;
+            const lastName = document.getElementById('bookingLastName').value;
+            const locationVal = document.getElementById('bookingLocation').value;
             const course = document.getElementById('bookingCourse').value;
-            if (!name) return alert("Please enter your name.");
+            const topics = document.getElementById('bookingTopics').value;
+            
+            if (!firstName || !lastName) return alert("Please enter both your first and last name.");
 
-            // Double check availability in local memory right before sending
             const conflict = currentBookings.some(b => b.scheduledDate === selectedDate && b.scheduledTime === selectedTime);
             if (conflict) {
                 alert("Sorry, that slot was just taken! Please select another time.");
@@ -517,8 +539,11 @@
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'bookings'), {
                     studentUid: currentUser.uid,
                     studentEmail: currentUser.email,
-                    studentName: name,
+                    studentFirstName: firstName,
+                    studentLastName: lastName,
+                    location: locationVal,
                     course: course,
+                    topics: topics,
                     scheduledDate: selectedDate,
                     scheduledTime: selectedTime,
                     timestamp: serverTimestamp(),
