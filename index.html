@@ -23,6 +23,20 @@
 </head>
 <body class="bg-slate-50 text-slate-900">
 
+    <!-- Global Site Announcement Banner -->
+    <div id="globalAnnouncementBanner" class="hidden w-full relative z-[60] transition-all duration-300">
+        <div id="announcementBg" class="px-4 py-3 sm:px-6 lg:px-8 text-white flex items-center justify-between shadow-md transition-colors">
+            <div class="flex items-center gap-3">
+                <i data-lucide="megaphone" class="w-5 h-5 flex-shrink-0"></i>
+                <p id="announcementText" class="text-sm font-medium"></p>
+                <a id="announcementLink" href="#" target="_blank" class="hidden underline text-sm font-bold ml-2 hover:opacity-80">Learn more</a>
+            </div>
+            <button onclick="dismissAnnouncement()" class="p-1 hover:bg-black/10 rounded-lg transition ml-4 flex-shrink-0">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- Navigation -->
     <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -223,9 +237,65 @@
 
         let currentUser = null, selectedDate = null, selectedTime = null, currentViewMonth = new Date().getMonth(), currentViewYear = new Date().getFullYear();
         let adminSettings = { weeklySchedule: {}, blackoutDates: [], specificDateSlots: {} }, userSessions = [], chatMessagesLocal = [];
+        let currentAnnouncementTime = null;
 
         lucide.createIcons();
 
+        // Site Announcements Logic
+        onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'announcement'), (docSnap) => {
+            const banner = document.getElementById('globalAnnouncementBanner');
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.isActive) {
+                    currentAnnouncementTime = data.updatedAt || Date.now();
+                    const dismissedTime = localStorage.getItem('dismissedAlertTime');
+
+                    // Show if they haven't dismissed it, OR if it has been updated since their last dismissal
+                    if (!dismissedTime || parseInt(dismissedTime) < currentAnnouncementTime) {
+                        document.getElementById('announcementText').innerText = data.message;
+                        const linkEl = document.getElementById('announcementLink');
+                        if (data.link) {
+                            linkEl.href = data.link;
+                            linkEl.classList.remove('hidden');
+                        } else {
+                            linkEl.classList.add('hidden');
+                        }
+
+                        // Apply themes
+                        const bgEl = document.getElementById('announcementBg');
+                        bgEl.className = 'px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between shadow-md transition-colors';
+                        
+                        if (data.theme === 'red') {
+                            bgEl.classList.add('bg-red-600', 'text-white');
+                        } else if (data.theme === 'green') {
+                            bgEl.classList.add('bg-green-600', 'text-white');
+                        } else if (data.theme === 'amber') {
+                            bgEl.classList.add('bg-amber-400', 'text-slate-900');
+                        } else {
+                            bgEl.classList.add('bg-indigo-600', 'text-white'); // default
+                        }
+
+                        banner.classList.remove('hidden');
+                        lucide.createIcons();
+                    } else {
+                        banner.classList.add('hidden');
+                    }
+                } else {
+                    banner.classList.add('hidden');
+                }
+            } else {
+                banner.classList.add('hidden');
+            }
+        });
+
+        window.dismissAnnouncement = () => {
+            if (currentAnnouncementTime) {
+                localStorage.setItem('dismissedAlertTime', currentAnnouncementTime.toString());
+            }
+            document.getElementById('globalAnnouncementBanner').classList.add('hidden');
+        };
+
+        // Availability settings logic
         onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), (docSnap) => {
             if (docSnap.exists()) { adminSettings = docSnap.data(); generateCalendar(); if (selectedDate) renderTimeSlots(); }
         });
