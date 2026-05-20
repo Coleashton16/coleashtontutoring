@@ -641,8 +641,8 @@
             window.showTourStep(0);
         };
 
+        /* High-fidelity auto-scrolling viewport placement for Guided Tour */
         window.showTourStep = (index) => {
-            // Check boundaries using equality to avoid XML parse issues
             if (index === -1 || index >= tourSteps.length) {
                 window.endTour();
                 return;
@@ -656,19 +656,23 @@
                 return;
             }
 
+            // Bring target into accurate center focus
             target.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
+            // Allow smooth scroll to settle perfectly before measuring coordinates
             setTimeout(() => {
                 const rect = target.getBoundingClientRect();
                 const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
                 const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
+                // Move backdrop highlight spotlight
                 const spotlight = document.getElementById('tourSpotlight');
                 spotlight.style.top = `${rect.top + scrollTop - 12}px`;
                 spotlight.style.left = `${rect.left + scrollLeft - 12}px`;
                 spotlight.style.width = `${rect.width + 24}px`;
                 spotlight.style.height = `${rect.height + 24}px`;
 
+                // Update text content and active labels
                 document.getElementById('tourStepTitle').innerText = step.title;
                 document.getElementById('tourStepText').innerText = step.text;
                 document.getElementById('tourStepProgress').innerText = `Step ${index + 1} of ${tourSteps.length}`;
@@ -687,9 +691,19 @@
                 const tooltipWidth = pointerCard.offsetWidth || 350;
                 const tooltipHeight = pointerCard.offsetHeight || 220;
 
-                let topPos = rect.bottom + scrollTop + 20;
+                // Smart directional vertical placement
+                let topPos = rect.bottom + scrollTop + 20; // Default: Below highlight
                 let leftPos = rect.left + scrollLeft + (rect.width / 2) - (tooltipWidth / 2);
 
+                const spaceAboveInViewport = rect.top;
+                const spaceBelowInViewport = window.innerHeight - rect.bottom;
+
+                // Flip tooltip above target only if there's solid headroom and tight bottom bounds
+                if (spaceBelowInViewport < tooltipHeight + 30 && spaceAboveInViewport > tooltipHeight + 30) {
+                    topPos = rect.top + scrollTop - tooltipHeight - 20;
+                }
+
+                // Strict screen edge bounding constraints (keeps card strictly inside visual viewport)
                 const viewportWidth = window.innerWidth;
                 const safetyMargin = 16;
                 if (leftPos < safetyMargin) {
@@ -698,12 +712,9 @@
                     leftPos = viewportWidth - tooltipWidth - safetyMargin;
                 }
 
-                const relativeBottom = rect.bottom;
-                if (relativeBottom + tooltipHeight + 50 > window.innerHeight) {
-                    const potentialTop = rect.top + scrollTop - tooltipHeight - 20;
-                    if (potentialTop > scrollTop + safetyMargin) {
-                        topPos = potentialTop;
-                    }
+                // Safeguard against layout overlaps (forces below if top boundary cuts off above document start)
+                if (topPos < scrollTop + safetyMargin) {
+                    topPos = rect.bottom + scrollTop + 20;
                 }
 
                 pointerCard.style.top = `${topPos}px`;
