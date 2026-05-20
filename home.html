@@ -3,236 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ashton Nursing Mentor | ADN Specialist Portal</title>
+    <title>Ashton Nursing Mentor | ADN Specialist</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
-        body { 
-            font-family: 'Inter', sans-serif; 
-            scroll-behavior: smooth;
-            background-color: #f8fafc;
-        }
-        .brand-font { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-        }
-        .calendar-grid { 
-            display: grid; 
-            grid-template-columns: repeat(7, 1fr); 
-            gap: 0.375rem;
-        }
-        .time-slot {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .time-slot:hover:not(.disabled) { 
-            background-color: #0d9488; 
-            color: white; 
-            border-color: #0d9488;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
-        }
-        .time-slot.selected { 
-            background-color: #0d9488 !important; 
-            color: white !important; 
-            border-color: #0d9488 !important;
-            box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
-        }
-        .disabled { 
-            opacity: 0.35; 
-            cursor: not-allowed; 
-            background-color: #f1f5f9; 
-            color: #94a3b8 !important; 
-            border-color: #e2e8f0 !important;
-        }
-        .loader { 
-            border: 3px solid #f3f3f3; 
-            border-top: 3px solid #0d9488; 
-            border-radius: 50%; 
-            width: 22px; 
-            height: 22px; 
-            animation: spin 0.8s linear infinite; 
-        }
-        @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
-        }
-        .chat-bubble-user { 
-            background: linear-gradient(135deg, #0d9488, #0f766e); 
-            color: white; 
-            align-self: flex-end; 
-            border-radius: 16px 16px 2px 16px; 
-            box-shadow: 0 4px 10px rgba(13, 148, 136, 0.15);
-        }
-        .chat-bubble-admin { 
-            background: #ffffff; 
-            color: #1e293b; 
-            align-self: flex-start; 
-            border-radius: 16px 16px 16px 2px; 
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e2e8f0;
-        }
-        .modal-backdrop { 
-            background-color: rgba(15, 23, 42, 0.45); 
-            backdrop-filter: blur(12px); 
-        }
-        .medical-pattern {
-            background-color: #ffffff;
-            background-image: radial-gradient(#0d9488 0.5px, transparent 0.5px), radial-gradient(#0d9488 0.5px, #ffffff 0.5px);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
-            opacity: 0.03;
-        }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .brand-font { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+        .time-slot:hover:not(.disabled) { background-color: #0d9488; color: white; }
+        .time-slot.selected { background-color: #0d9488; color: white; border-color: #0d9488; }
+        .disabled { opacity: 0.3; cursor: not-allowed; background-color: #f3f4f6; color: #94a3b8 !important; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #0d9488; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .chat-bubble-user { background: #0d9488; color: white; align-self: flex-end; border-radius: 12px 12px 0 12px; }
+        .chat-bubble-admin { background: #f1f5f9; color: #1e293b; align-self: flex-start; border-radius: 12px 12px 12px 0; }
+        .modal-backdrop { background-color: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); }
 
-        /* Tour Spotlight animations */
-        .tour-spotlight-active {
-            position: relative !important;
-            z-index: 1005 !important;
-            box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.75) !important;
+        /* Onboarding Tour Spotlight and Tooltip Styling */
+        #tourSpotlight {
+            position: absolute;
             pointer-events: none;
+            z-index: 180;
+            border-radius: 1.5rem;
+            box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.85);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #tourPointerCard {
+            position: absolute;
+            z-index: 190;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            width: calc(100vw - 32px);
+            max-width: 380px;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-teal-100 selection:text-teal-900">
+<body class="bg-slate-50 text-slate-900">
 
-    <!-- Onboarding Guided Tour Container (Appears dynamically for new users) -->
-    <div id="tourOverlay" class="fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-sm hidden flex flex-col items-center justify-center p-4 transition-all duration-300">
-        <!-- Guidelines/Honor Agreement Step Card -->
-        <div id="tourGuidelinesCard" class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh] hidden">
-            <!-- Card Header -->
-            <div class="bg-gradient-to-r from-teal-700 to-slate-900 p-8 text-white relative flex-shrink-0">
-                <div class="absolute -right-10 -bottom-10 w-40 h-40 rounded-full bg-teal-500/10 blur-xl"></div>
-                <div class="relative z-10 flex items-center gap-4">
-                    <div class="p-3 bg-white/10 rounded-2xl border border-white/20">
-                        <i data-lucide="shield-alert" class="w-8 h-8 text-teal-300"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-2xl font-black brand-font tracking-tight">Academic Integrity & Guidelines</h3>
-                        <p class="text-xs text-teal-200 mt-1">Please agree to our mentorship principles to proceed</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Guideline Content Scroll -->
-            <div class="flex-1 overflow-y-auto p-8 space-y-6 bg-slate-50">
-                <p class="text-sm text-slate-600 leading-relaxed font-medium">
-                    Welcome to the Ashton Nursing Mentor Portal! Before we walk you through your new student dashboard, please review and accept our professional code of conduct:
-                </p>
-
-                <!-- Guideline Rules Grid -->
-                <div class="space-y-4">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200/60 flex gap-4 items-start shadow-sm">
-                        <div class="p-2 bg-rose-50 text-rose-600 rounded-xl flex-shrink-0">
-                            <i data-lucide="ban" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-900 text-sm">Strict Anti-Cheating Honor Code</h4>
-                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                                Mentorship is intended for conceptual support and clinical preparation. You are strictly forbidden from sharing active exams, requesting live quiz assistance, or utilizing materials to bypass educational standards.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200/60 flex gap-4 items-start shadow-sm">
-                        <div class="p-2 bg-amber-50 text-amber-600 rounded-xl flex-shrink-0">
-                            <i data-lucide="copyright" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-900 text-sm">Intellectual Property & Copyrights</h4>
-                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                                All study guides, practice calculations, path charts, and feedback notes distributed by Cole Ashton are proprietary intellectual property. Distribution, resale, or unauthorized sharing of these files is prohibited.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200/60 flex gap-4 items-start shadow-sm">
-                        <div class="p-2 bg-teal-50 text-teal-600 rounded-xl flex-shrink-0">
-                            <i data-lucide="calendar-x" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-900 text-sm">Attendance & No-Show Regulations</h4>
-                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                                Missed sessions prevent other students from scheduling guidance. Standard attendance dictates cancellations must be submitted 24 hours prior. Unexcused consecutive no-shows can result in direct account restriction.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Guideline Footer -->
-            <div class="p-6 bg-white border-t border-slate-100 flex justify-end gap-3 flex-shrink-0">
-                <button onclick="handleSignOut()" class="px-5 py-3 border border-slate-200 text-slate-500 hover:bg-slate-50 font-bold rounded-xl transition text-sm">Decline & Exit</button>
-                <button onclick="advanceTour()" class="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-extrabold rounded-xl transition text-sm flex items-center gap-2 shadow-lg shadow-teal-600/15">
-                    Accept & Begin Tour <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                </button>
-            </div>
-        </div>
+    <!-- Guided Tour Spotlight and Card -->
+    <div id="tourOverlay" class="fixed inset-0 z-[170] pointer-events-none hidden">
+        <div id="tourSpotlight"></div>
     </div>
-
-    <!-- Interactive Tour Indicator Tooltip Block (Moved outside overlay for isolated stacking level) -->
-    <div id="tourPointerCard" class="absolute z-[1010] bg-white text-slate-800 p-6 rounded-3xl border border-teal-500/30 max-w-sm w-full shadow-2xl pointer-events-auto hidden transform transition-all duration-300">
-        <!-- Visual Pointer arrow -->
-        <div id="tourPointerArrow" class="absolute w-4 h-4 bg-white rotate-45 border-t border-l border-teal-500/30"></div>
-        
-        <div class="space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                <span class="text-[10px] font-bold text-teal-600 uppercase tracking-widest flex items-center gap-1">
-                    <i data-lucide="compass" class="w-3.5 h-3.5 animate-spin"></i> Interactive Walkthrough
-                </span>
-                <span id="tourStepBadge" class="text-[10px] font-extrabold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Step 2 of 4</span>
-            </div>
-            
-            <div>
-                <h4 id="tourStepTitle" class="font-black text-slate-900 text-base brand-font">Title Here</h4>
-                <p id="tourStepDesc" class="text-xs text-slate-600 leading-relaxed mt-1">Instructions here</p>
-            </div>
-
-            <div class="flex items-center justify-between pt-2">
-                <button onclick="skipTour()" class="text-xs font-bold text-slate-400 hover:text-slate-600 transition">Skip tour</button>
-                <button id="tourNextBtn" onclick="advanceTour()" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-black rounded-xl shadow-md transition flex items-center gap-1.5">
-                    Got it! <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                </button>
+    
+    <!-- Floating Pointer Tooltip Card (Direct sibling of body to isolate stacking contexts) -->
+    <div id="tourPointerCard" class="hidden bg-white rounded-3xl p-6 shadow-2xl border border-teal-100 flex flex-col pointer-events-auto">
+        <div class="flex items-center gap-2 mb-3">
+            <span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
+            <span id="tourStepProgress" class="text-xs font-bold text-teal-600 uppercase tracking-wider">Step 1 of 3</span>
+        </div>
+        <h4 id="tourStepTitle" class="text-base font-extrabold text-slate-900 mb-2">Guided Tour Step</h4>
+        <p id="tourStepText" class="text-xs text-slate-600 leading-relaxed mb-6"></p>
+        <div class="flex justify-between items-center border-t border-slate-100 pt-4">
+            <button onclick="prevTourStep()" class="text-xs text-slate-400 hover:text-slate-900 transition font-bold">Previous</button>
+            <div class="flex gap-2">
+                <button onclick="endTour()" class="text-xs text-slate-400 hover:text-red-500 transition font-bold px-3">Skip</button>
+                <button id="tourNextBtn" onclick="nextTourStep()" class="bg-teal-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-teal-700 transition flex items-center gap-1.5"></button>
             </div>
         </div>
-    </div>
-
-    <!-- Global Custom Toast Notification Element -->
-    <div id="customToast" class="fixed top-20 right-6 z-[300] max-w-sm w-full bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 flex items-start gap-3">
-        <div id="toastIconContainer" class="p-2 rounded-xl text-white"></div>
-        <div class="flex-1">
-            <h4 id="toastTitle" class="font-bold text-sm text-slate-900">Notification</h4>
-            <p id="toastMessage" class="text-xs text-slate-600 mt-0.5 leading-relaxed"></p>
-        </div>
-        <button onclick="dismissToast()" class="text-slate-400 hover:text-slate-600 transition">
-            <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
     </div>
 
     <!-- Global Site Announcement Banner -->
     <div id="globalAnnouncementBanner" class="hidden w-full relative z-[60] transition-all duration-300">
-        <div id="announcementBg" class="px-4 py-3 sm:px-6 lg:px-8 text-white flex items-center justify-between shadow-md transition-colors font-medium">
+        <div id="announcementBg" class="px-4 py-3 sm:px-6 lg:px-8 text-white flex items-center justify-between shadow-md transition-colors">
             <div class="flex items-center gap-3">
-                <div class="p-1 bg-white/15 rounded-lg">
-                    <i data-lucide="megaphone" class="w-4.5 h-4.5 flex-shrink-0"></i>
-                </div>
-                <p id="announcementText" class="text-xs sm:text-sm font-medium tracking-wide"></p>
-                <a id="announcementLink" href="#" target="_blank" class="hidden text-xs sm:text-sm font-bold ml-2 underline decoration-wavy hover:opacity-90 flex items-center gap-1">
-                    Learn more <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-                </a>
+                <i data-lucide="megaphone" class="w-5 h-5 flex-shrink-0"></i>
+                <p id="announcementText" class="text-sm font-medium"></p>
+                <a id="announcementLink" href="#" target="_blank" class="hidden underline text-sm font-bold ml-2 hover:opacity-80">Learn more</a>
             </div>
             <button onclick="dismissAnnouncement()" class="p-1 hover:bg-black/10 rounded-lg transition ml-4 flex-shrink-0">
                 <i data-lucide="x" class="w-4 h-4"></i>
@@ -240,624 +76,445 @@
         </div>
     </div>
 
-    <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-all">
-        <div class="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
-            <!-- Brand Logo -->
-            <div class="flex items-center gap-3 group cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-                <div class="bg-gradient-to-tr from-teal-600 to-cyan-500 p-2.5 rounded-2xl shadow-md shadow-teal-600/10 transition-transform group-hover:scale-105">
-                    <i data-lucide="stethoscope" class="text-white w-5 h-5"></i>
-                </div>
-                <div class="flex flex-col">
-                    <span class="brand-font font-extrabold text-xl tracking-tight text-slate-950 leading-none">Ashton Nursing</span>
-                    <span class="text-[11px] font-bold text-teal-600 tracking-wider uppercase mt-1">ADN Specialist Mentor</span>
-                </div>
-            </div>
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="fixed top-20 right-6 z-[300] flex flex-col gap-3 pointer-events-none max-w-sm w-full"></div>
 
-            <!-- Nav Actions / User Panel -->
-            <div class="flex items-center gap-4">
-                <div class="hidden md:flex items-center gap-8 font-semibold text-slate-600 mr-4">
-                    <a href="#services" class="hover:text-teal-600 transition text-sm">Mentoring Areas</a>
-                    <a id="navAboutLink" href="#about-me" class="hover:text-teal-600 transition text-sm">About Cole</a>
-                    <a href="#schedule" class="hover:text-teal-600 transition text-sm">Book Session</a>
-                </div>
-                
-                <div id="userProfile" class="flex items-center gap-3">
-                    <button id="loginNavBtn" onclick="toggleAuthOverlay()" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl hover:bg-teal-600 transition duration-300 font-bold text-sm shadow-md shadow-slate-900/10 flex items-center gap-2">
-                        <i data-lucide="log-in" class="w-4 h-4"></i> Student Log In
-                    </button>
-                    
-                    <div id="userInfo" class="hidden flex items-center gap-3 bg-slate-50 border border-slate-200/60 p-1.5 pr-4 rounded-2xl">
-                        <!-- User Avatar Circle -->
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-500 to-cyan-600 flex items-center justify-center text-white font-extrabold text-sm border border-teal-400/20" id="userAvatar">
-                            S
-                        </div>
-                        <div class="flex flex-col hidden sm:flex">
-                            <span id="userNameDisplay" class="text-xs font-bold text-slate-800 leading-tight"></span>
-                            <span class="text-[9px] text-teal-600 font-bold tracking-wider uppercase leading-none mt-0.5">Active Student</span>
-                        </div>
-                        <div class="h-6 w-px bg-slate-200 ml-2 hidden sm:block"></div>
-                        <button onclick="handleSignOut()" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-2 py-1 hover:bg-rose-50 rounded-lg transition" title="Log Out">
-                            Logout
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="bg-teal-600 p-2 rounded-xl shadow-sm"><i data-lucide="stethoscope" class="text-white w-5 h-5"></i></div>
+                <span class="brand-font font-bold text-xl tracking-tight text-slate-900">Ashton Nursing <span class="text-teal-600">Mentor</span></span>
+            </div>
+            <div class="flex items-center gap-4 font-medium text-slate-600">
+                <a href="#services" class="hidden md:inline hover:text-teal-600 transition">Courses</a>
+                <a href="#about-me" class="hidden md:inline hover:text-teal-600 transition">About</a>
+                <a href="#schedule" class="hidden md:inline hover:text-teal-600 transition">Schedule</a>
+                <div id="userProfile" class="flex items-center gap-4">
+                    <button id="loginNavBtn" onclick="toggleAuthOverlay()" class="bg-teal-600 text-white px-5 py-2.5 rounded-xl hover:bg-teal-700 transition font-bold text-sm">Sign In</button>
+                    <div id="userInfo" class="hidden flex items-center gap-3">
+                        <button onclick="scrollToDashboard()" class="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-black transition text-sm font-bold shadow-lg">
+                            <i data-lucide="layout-grid" class="w-4 h-4"></i> Dashboard
                         </button>
+                        <div class="h-8 w-px bg-slate-200 hidden sm:block"></div>
+                        <span id="userNameDisplay" class="text-sm font-bold text-slate-700 hidden sm:inline-block"></span>
+                        <button onclick="handleSignOut()" class="text-xs text-red-500 font-bold hover:underline">Logout</button>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero / Promotional Header (Adapts smoothly for logged-in and logged-out views) -->
-    <header id="marketingHero" class="relative overflow-hidden pt-12 pb-20 px-4 max-w-6xl mx-auto">
-        <div class="absolute inset-0 medical-pattern rounded-[3rem]"></div>
-        
-        <div class="relative z-10 text-center max-w-4xl mx-auto">
-            <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 mb-6 leading-tight tracking-tight brand-font">
-                Master Clinical Reasonings & <br>
-                <span class="bg-gradient-to-r from-teal-600 to-cyan-500 bg-clip-text text-transparent">Excel in Your ADN Journey</span>
-            </h1>
-            <p class="text-base md:text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-                Pass those complex exams, solve nursing dosage calculations, and conquer medical-surgical subjects with individual 1-on-1 expert coaching.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <a href="#schedule" class="w-full sm:w-auto px-8 py-4 bg-teal-600 text-white font-extrabold rounded-2xl shadow-xl shadow-teal-600/15 hover:bg-teal-700 hover:scale-[1.02] active:scale-[0.98] transition duration-300 text-center flex items-center justify-center gap-2">
-                    <i data-lucide="calendar-plus" class="w-5 h-5"></i> Book a Clinical Session
-                </a>
-                <a href="#services" class="w-full sm:w-auto px-8 py-4 bg-white border border-slate-200/80 text-slate-700 font-bold rounded-2xl hover:bg-slate-50 transition duration-300 text-center">
-                    Review Core ADN Subjects
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Public Visitor Meet Cole Section (Only visible when user is not logged in) -->
-    <section id="aboutMeSection" class="py-16 px-4 max-w-6xl mx-auto relative">
-        <div class="bg-white border border-slate-200/80 rounded-[2.5rem] shadow-xl overflow-hidden p-8 md:p-12">
-            <div class="grid lg:grid-cols-12 gap-12 items-center">
-                <!-- Left: Profile Image Box -->
-                <div class="lg:col-span-5 flex justify-center">
-                    <div class="relative group">
-                        <!-- Decorative Medical Glow Background -->
-                        <div class="absolute -inset-4 bg-gradient-to-tr from-teal-500 to-cyan-500 rounded-[2.5rem] opacity-20 blur-xl transition group-hover:opacity-30"></div>
-                        
-                        <!-- Premium Profile Image Wrapper -->
-                        <div class="relative bg-white p-3 rounded-[2.25rem] border border-slate-200/60 shadow-lg">
-                            <img src="profileimage.jpg" alt="Cole Ashton" onerror="this.src='https://placehold.co/400x500/0d9488/ffffff?text=Cole+Ashton'" class="w-72 h-96 md:w-80 md:h-[420px] rounded-[1.75rem] object-cover shadow-inner bg-slate-100">
-                            
-                            <!-- Static overlay credentials badge -->
-                            <div class="absolute -bottom-4 right-4 bg-slate-900 text-white py-2.5 px-4 rounded-xl shadow-lg border border-slate-800 text-xs font-bold tracking-wide">
-                                Cole Ashton, ADN Mentor
-                            </div>
-                        </div>
-                    </div>
+    <!-- Academic Guidelines and Agreement Modal (Triggers for New Users) -->
+    <div id="guidelinesOverlay" class="fixed inset-0 z-[250] modal-backdrop flex items-center justify-center hidden p-4">
+        <div class="bg-white p-8 sm:p-10 rounded-[2.5rem] max-w-2xl w-full text-left shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                <div class="bg-teal-50 p-3 rounded-2xl text-teal-600">
+                    <i data-lucide="shield-alert" class="w-6 h-6"></i>
                 </div>
-
-                <!-- Right: Credentials and Bio Description -->
-                <div class="lg:col-span-7 space-y-6">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 text-xs font-bold text-teal-700 bg-teal-50 rounded-full border border-teal-100 uppercase tracking-wider">
-                        Meet Your Educator
-                    </div>
-                    
-                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-950 brand-font leading-tight">
-                        Compassionate Clinical Guidance Built Specifically for ADN Scholars
-                    </h2>
-                    
-                    <p class="text-slate-600 text-sm md:text-base leading-relaxed font-medium">
-                        Welcome! I am <strong class="text-slate-900 font-bold">Cole Ashton</strong>, your specialist academic coach. As an educator specializing in Associate Degree in Nursing (ADN) subjects, my mission is to simplify complex pathophysiological concepts, streamline clinical math calculations, and rebuild exam taking confidence.
+                <div>
+                    <h3 class="text-2xl font-extrabold brand-font text-slate-900">Academic Guidelines & Agreement</h3>
+                    <p class="text-xs text-slate-400">Please review and accept to continue to your student portal</p>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto pr-2 space-y-6 text-sm text-slate-600 leading-relaxed">
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> 1. Academic Integrity & Anti-Cheating
+                    </h4>
+                    <p class="text-xs pl-3.5">
+                        These tutoring resources are designed strictly for educational review and test-preparation purposes. Students are strictly prohibited from using these sessions, tutoring materials, or shared answers to cheat on college assignments, tests, or clinical evaluations. 
                     </p>
-                    
-                    <p class="text-slate-600 text-xs md:text-sm leading-relaxed">
-                        Nursing school can feel overwhelming, but mastering clinical reasoning doesn't have to be. Through structured, custom study paths and exam-taking blueprints, we will turn textbook complexity into clear, actionable nursing knowledge.
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> 2. Proprietary & Copyrighted Materials
+                    </h4>
+                    <p class="text-xs pl-3.5">
+                        All study guides, custom test questions, nursing flashcards, lectures, and resources provided during mentorship are copyrighted proprietary assets of Cole Ashton. Sharing, publishing online, or distributing these materials outside this portal without prior written authorization is strictly prohibited.
                     </p>
-
-                    <!-- Stats / Trust Indicators Grid -->
-                    <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
-                        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/40 text-center">
-                            <span class="block text-xl md:text-2xl font-black text-teal-600">98%</span>
-                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pass Rate</span>
-                        </div>
-                        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/40 text-center">
-                            <span class="block text-xl md:text-2xl font-black text-teal-600">1,000+</span>
-                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Hours Mentored</span>
-                        </div>
-                        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/40 text-center">
-                            <span class="block text-xl md:text-2xl font-black text-teal-600">1-on-1</span>
-                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Focused Care</span>
-                        </div>
-                    </div>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- LOGGED IN STUDENT HUB SECTION (Displays automatically when logged in) -->
-    <section id="studentPortalDashboardSection" class="hidden py-8 px-4 max-w-6xl mx-auto relative">
-        <div class="bg-white border border-slate-200 rounded-[2.5rem] shadow-xl overflow-hidden mb-12">
-            <!-- Header bar with Personalized Portal Welcome -->
-            <div class="bg-slate-900 text-white p-8 relative overflow-hidden">
-                <div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-teal-500/10 blur-3xl"></div>
-                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 bg-teal-500/15 border border-teal-500/20 rounded-2xl text-teal-400">
-                            <i data-lucide="sparkles" class="w-8 h-8"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl sm:text-3xl font-extrabold brand-font tracking-tight">
-                                Hey there, <span id="welcomeName" class="text-teal-400">Student</span>! 👋
-                            </h2>
-                            <p class="text-sm text-slate-300 mt-1 font-medium">Welcome back to your ADN Specialist Portal. Your learning progress is key.</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-3">
-                        <button onclick="toggleAppointmentsSuite()" class="bg-teal-600 text-white font-bold px-5 py-3 rounded-xl hover:bg-teal-700 transition flex items-center gap-2 text-sm shadow-lg shadow-teal-600/10">
-                            <i data-lucide="layout-grid" class="w-4 h-4"></i> Detailed Dashboard
-                        </button>
-                    </div>
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> 3. Fair Use & Attendance Policy
+                    </h4>
+                    <p class="text-xs pl-3.5">
+                        In order to offer all nursing students equal access, booked times must be respected. "No-shows" or cancellations made less than 24 hours prior to the session prevent other students from booking. Accumulating three consecutive no-shows or late cancellations may result in administrative account suspension.
+                    </p>
                 </div>
             </div>
 
-            <!-- Quick Overview & Active Bookings Hub -->
-            <div class="p-8 bg-slate-50/50">
-                <div class="grid lg:grid-cols-3 gap-8">
-                    
-                    <!-- LEFT/CENTER: Interactive list of appointments -->
-                    <div class="lg:col-span-2 space-y-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                                <i data-lucide="calendar" class="text-teal-600 w-5 h-5"></i> Upcoming & Past Appointments
-                            </h3>
-                            <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Sync Status: Live</span>
-                        </div>
-                        
-                        <div id="portalDashboardAppointments" class="space-y-4 min-h-[160px]">
-                            <!-- Dynamically filled with renderUserSessions() -->
-                            <div class="flex flex-col items-center justify-center p-12 text-center bg-white rounded-3xl border border-slate-100">
-                                <div class="p-3 bg-slate-50 text-slate-400 rounded-full mb-3">
-                                    <i data-lucide="calendar-days" class="w-8 h-8"></i>
-                                </div>
-                                <p class="text-slate-500 text-sm font-medium">Fetching secure records...</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- RIGHT: Quick Mentor Card (USES PROFILE IMAGE) -->
-                    <div class="space-y-6">
-                        <div class="bg-white border border-slate-200/80 p-6 rounded-3xl shadow-sm">
-                            <div class="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100">
-                                <div class="relative">
-                                    <!-- Replaced icon with profile image as requested -->
-                                    <img src="profileimage.jpg" alt="Cole Ashton" onerror="this.src='https://placehold.co/100x100/0d9488/ffffff?text=Cole'" class="w-12 h-12 rounded-2xl object-cover border border-slate-200 shadow-md">
-                                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-900">Cole Ashton</h4>
-                                    <p class="text-xs text-teal-600 font-bold uppercase tracking-wider">Your ADN Mentor</p>
-                                </div>
-                            </div>
-                            
-                            <!-- Learning Progress Widget -->
-                            <div class="bg-slate-50 p-4 rounded-2xl mb-4">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-xs font-bold text-slate-500">Mentoring Progress</span>
-                                    <span id="sessionCountBadge" class="text-xs font-extrabold text-teal-600">0 Sessions</span>
-                                </div>
-                                <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                                    <div id="sessionProgressBar" class="bg-gradient-to-r from-teal-500 to-cyan-500 h-full transition-all duration-500" style="width: 5%"></div>
-                                </div>
-                            </div>
-
-                            <p class="text-xs text-slate-500 leading-relaxed mb-4">
-                                Have any questions regarding clinical tasks or assignment guides? Open the chat assistant below to connect directly with Cole.
-                            </p>
-
-                            <button onclick="toggleChatWindow()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-2">
-                                <i data-lucide="message-square" class="w-4 h-4"></i> Send Message to Cole
-                            </button>
-                        </div>
-
-                        <!-- Resources/Quick links -->
-                        <div class="bg-gradient-to-br from-teal-900 to-slate-950 text-white p-6 rounded-3xl relative overflow-hidden shadow-md">
-                            <div class="absolute -right-10 -bottom-10 w-32 h-32 rounded-full bg-teal-500/10"></div>
-                            <h4 class="font-bold text-sm mb-2 flex items-center gap-2">
-                                <i data-lucide="book-marked" class="text-teal-400"></i> Nursing Exam Prep Tool
-                            </h4>
-                            <p class="text-[11px] text-slate-300 leading-relaxed mb-4">
-                                Keep track of critical lab values and safe dosage rules between our scheduled feedback loops.
-                            </p>
-                            <a href="#schedule" class="text-[11px] font-bold text-teal-400 hover:text-white transition flex items-center gap-1">
-                                Reserve your next preparation slot <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Student Dashboard Modal -->
-    <div id="appointmentsSuite" class="fixed inset-0 z-[150] modal-backdrop flex items-center justify-center p-4 hidden">
-        <div class="bg-white w-full max-w-4xl max-h-[90vh] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
-            <!-- Modal Header -->
-            <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white relative">
-                <div class="absolute -left-10 -top-10 w-40 h-40 rounded-full bg-teal-500/10 blur-2xl"></div>
-                <div class="relative z-10">
-                    <h2 class="text-2xl font-extrabold brand-font">Student Administration</h2>
-                    <p class="text-xs text-slate-300 mt-1">Review receipts, complete schedules, and study clinical remarks.</p>
-                </div>
-                <button onclick="toggleAppointmentsSuite()" class="p-2.5 hover:bg-slate-800 rounded-xl text-white transition"><i data-lucide="x" class="w-6 h-6"></i></button>
-            </div>
-            <!-- Modal body -->
-            <div class="flex-1 overflow-y-auto p-8 bg-slate-50">
-                <div id="studentAppointmentsList" class="grid gap-4"></div>
+            <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <p class="text-[11px] text-slate-400 text-center sm:text-left">By clicking agree, you confirm adherence to these policies.</p>
+                <button onclick="acceptGuidelines()" class="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white px-8 py-3.5 rounded-2xl font-bold transition flex items-center justify-center gap-2">
+                    <span>I Agree & Accept</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Core Tutoring Subjects Directory -->
-    <section id="services" class="py-20 bg-white border-y border-slate-200/60">
-        <div class="max-w-6xl mx-auto px-4 text-center">
-            <div class="inline-flex items-center gap-2 px-3 py-1 mb-4 text-xs font-semibold text-teal-700 bg-teal-50 rounded-full">ADN Specialized Care</div>
-            <h2 class="text-3xl font-extrabold mb-4 brand-font text-slate-950">Specialized ADN Tutoring Curriculum</h2>
-            <p class="text-slate-500 text-sm max-w-xl mx-auto mb-16 leading-relaxed">Comprehensive conceptual coaching structures focused on elevating your critical care intelligence.</p>
+    <!-- Logged Out Welcome Hero & About Me -->
+    <div id="loggedOutHero" class="block">
+        <header class="py-16 md:py-24 px-4 max-w-6xl mx-auto text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 mb-8 text-sm font-semibold text-teal-700 bg-teal-50 rounded-full border border-teal-100">Professional ADN Tutoring</div>
+            <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 mb-6 leading-tight brand-font">Excel in Nursing with <br><span class="text-teal-600">Cole Ashton</span></h1>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">Bridge the gap between classroom theory and clinical excellence with personalized 1-on-1 mentorship.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#schedule" class="px-8 py-4 bg-teal-600 text-white font-bold rounded-xl shadow-lg shadow-teal-200 hover:scale-105 transition">Reserve Your Session</a>
+                <a href="#services" class="px-8 py-4 bg-white border border-slate-200 font-bold rounded-xl hover:bg-slate-50 transition">View Subjects</a>
+            </div>
+        </header>
+
+        <!-- About Me Section -->
+        <section id="about-me" class="py-20 bg-slate-100 border-t border-b border-slate-200">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="bg-white rounded-[2.5rem] shadow-xl p-8 sm:p-12 flex flex-col md:flex-row gap-10 items-center">
+                    <div class="relative w-48 h-48 sm:w-56 sm:h-56 flex-shrink-0">
+                        <img id="aboutProfileImg" src="profileimage.jpg" alt="Cole Ashton" onerror="this.onerror=null;this.src='https://placehold.co/300x300/115e59/ffffff?text=Cole+Ashton';" class="w-full h-full object-cover rounded-[2rem] border-4 border-teal-50 shadow-lg">
+                        <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-teal-600 text-white text-xs px-4 py-1.5 rounded-full font-bold shadow-md whitespace-nowrap">ADN Specialist</div>
+                    </div>
+                    <div class="flex-1 text-center md:text-left">
+                        <h2 class="text-3xl font-extrabold text-slate-900 brand-font mb-2">Meet Your Mentor</h2>
+                        <h3 class="text-teal-600 font-bold text-sm uppercase tracking-wide mb-6">Registered Nurse (RN) & ADN Clinical Coach</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-6">
+                            "Hi, I’m Cole. Having navigated the rigors of ADN coursework and high-stakes clinical exams myself, I know how overwhelming nursing school can feel. I specialize in breaking down complex pharmacology calculations, mastering health assessment techniques, and helping you build clinical reasoning skills to confidently pass the NCLEX."
+                        </p>
+                        <div class="grid grid-cols-2 gap-4 text-left border-t border-slate-100 pt-6">
+                            <div class="flex items-center gap-2 text-xs font-bold text-slate-700">
+                                <i data-lucide="award" class="text-teal-600 w-5 h-5 flex-shrink-0"></i>
+                                <span>Certified Clinical RN</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs font-bold text-slate-700">
+                                <i data-lucide="check-square" class="text-teal-600 w-5 h-5 flex-shrink-0"></i>
+                                <span>NCLEX Pass-Prep Focus</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Logged In Welcome Header & Dashboard Live Feed -->
+    <div id="loggedInDashboard" class="hidden max-w-6xl mx-auto px-4 py-12">
+        <div class="bg-gradient-to-r from-teal-800 to-cyan-900 rounded-[3rem] p-8 sm:p-12 text-white shadow-2xl mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative overflow-hidden">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(20,184,166,0.15),transparent)] pointer-events-none"></div>
+            <div class="relative z-10">
+                <h1 id="welcomeGreeting" class="text-3xl sm:text-4xl font-extrabold brand-font mb-3">Hey there, Student! 👋</h1>
+                <p class="text-teal-100 text-sm max-w-lg leading-relaxed">Welcome back to your clinical mentoring workspace. View your active course appointments, review personalized clinical feedback, and chat with Cole below.</p>
+            </div>
             
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
-                <!-- Subject 1 -->
-                <div class="p-8 rounded-3xl border border-slate-150 bg-slate-50/50 hover:shadow-xl hover:border-teal-500/30 transition duration-300 group hover:bg-white">
-                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-600 group-hover:text-white text-teal-600 transition duration-300">
-                        <i data-lucide="book-open" class="w-5 h-5"></i>
-                    </div>
-                    <h3 class="text-lg font-bold mb-2 text-slate-900 group-hover:text-teal-600 transition">Introduction to Nursing</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Fundamental concepts, professional safety procedures, and critical nursing frameworks.</p>
+            <!-- Mentorship Credentials Fast Card -->
+            <div class="relative z-10 bg-white/10 backdrop-blur-md p-6 rounded-[2rem] border border-white/10 flex items-center gap-4 w-full md:max-w-xs flex-shrink-0">
+                <img id="dashboardMentorImg" src="profileimage.jpg" alt="Cole Ashton" onerror="this.onerror=null;this.src='https://placehold.co/120x120/115e59/ffffff?text=Cole+Ashton';" class="w-14 h-14 object-cover rounded-2xl border-2 border-white/20">
+                <div class="text-left">
+                    <p class="text-xs font-bold text-teal-300 uppercase tracking-wider">Your Mentor</p>
+                    <p class="font-extrabold text-sm text-white">Cole Ashton, RN</p>
+                    <span class="inline-flex items-center gap-1.5 text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full mt-1.5 font-bold">
+                        <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span> Online & Available
+                    </span>
                 </div>
-                <!-- Subject 2 -->
-                <div class="p-8 rounded-3xl border border-slate-150 bg-slate-50/50 hover:shadow-xl hover:border-teal-500/30 transition duration-300 group hover:bg-white">
-                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-600 group-hover:text-white text-teal-600 transition duration-300">
-                        <i data-lucide="activity" class="w-5 h-5"></i>
+            </div>
+        </div>
+
+        <!-- Student Dashboard Direct Interactive Panels -->
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Left Side: Appointments and Invoice Feed -->
+            <div class="lg:col-span-2 space-y-8">
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-teal-50 p-3 rounded-2xl text-teal-600"><i data-lucide="calendar-check" class="w-6 h-6"></i></div>
+                            <div>
+                                <h3 class="text-lg font-extrabold text-slate-900 brand-font">Upcoming Appointments</h3>
+                                <p class="text-xs text-slate-400">Real-time schedule of review sessions</p>
+                            </div>
+                        </div>
+                        <a href="#schedule" class="bg-teal-50 hover:bg-teal-100 text-teal-700 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                            <span>New Booking</span>
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        </a>
                     </div>
-                    <h3 class="text-lg font-bold mb-2 text-slate-900 group-hover:text-teal-600 transition">Health Assessment</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Performing systems examinations, understanding patient data, and recognizing standard deviations.</p>
+                    <div id="studentAppointmentsList" class="grid gap-4">
+                        <!-- Populated Dynamically -->
+                    </div>
                 </div>
-                <!-- Subject 3 -->
-                <div class="p-8 rounded-3xl border border-slate-150 bg-slate-50/50 hover:shadow-xl hover:border-teal-500/30 transition duration-300 group hover:bg-white">
-                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-600 group-hover:text-white text-teal-600 transition duration-300">
-                        <i data-lucide="heart-pulse" class="w-5 h-5"></i>
+            </div>
+
+            <!-- Right Side: Mentor Announcements & Activity Card -->
+            <div class="space-y-8">
+                <!-- Mentorship Integrity Box -->
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                        <div class="bg-rose-50 p-3 rounded-2xl text-rose-600"><i data-lucide="heart-handshake" class="w-6 h-6"></i></div>
+                        <div>
+                            <h3 class="text-base font-extrabold text-slate-900 brand-font">Mentorship Policy</h3>
+                            <p class="text-xs text-slate-400">Guarantees & Compliance</p>
+                        </div>
                     </div>
-                    <h3 class="text-lg font-bold mb-2 text-slate-900 group-hover:text-teal-600 transition">Adult Health I & II</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Pathophysiology, advanced clinical conditions, and strategic Med-Surg care planning.</p>
+                    <ul class="space-y-3.5 text-xs text-slate-600 leading-relaxed">
+                        <li class="flex gap-2.5">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5"></i>
+                            <span>All sessions fall strictly under Academic Integrity regulations.</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <i data-lucide="clock" class="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5"></i>
+                            <span>Reschedules require 24-hour advanced portal notification.</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <i data-lucide="file-text" class="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5"></i>
+                            <span>Digital invoices contain notes on clinical calculation feedback.</span>
+                        </li>
+                    </ul>
                 </div>
-                <!-- Subject 4 -->
-                <div class="p-8 rounded-3xl border border-slate-150 bg-slate-50/50 hover:shadow-xl hover:border-teal-500/30 transition duration-300 group hover:bg-white">
-                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-600 group-hover:text-white text-teal-600 transition duration-300">
-                        <i data-lucide="pill" class="w-5 h-5"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Courses Section -->
+    <section id="services" class="py-20 bg-white border-t border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-extrabold mb-4 brand-font">Core ADN Tutoring Subjects</h2>
+            <p class="text-slate-500 text-sm max-w-md mx-auto mb-16">High-yield clinical topics designed around the Associate Degree in Nursing curriculum.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Course Card 1 -->
+                <div class="p-8 rounded-[2rem] border border-slate-100 bg-slate-50 hover:shadow-xl hover:border-teal-100 transition duration-300 group text-left">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-600 transition duration-300">
+                        <i data-lucide="book-open" class="text-teal-600 group-hover:text-white transition"></i>
                     </div>
-                    <h3 class="text-lg font-bold mb-2 text-slate-900 group-hover:text-teal-600 transition">Pharmacology</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Drug classifications, dosage calculations, clinical indications, and toxic side effects.</p>
+                    <h3 class="text-lg font-bold mb-3 text-slate-900">Introduction to Nursing</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Fundamental concepts, nursing theory, study strategies, and establishing professional nursing guidelines.</p>
                 </div>
-                <!-- Subject 5 -->
-                <div class="p-8 rounded-3xl border border-slate-150 bg-slate-50/50 hover:shadow-xl hover:border-teal-500/30 transition duration-300 group hover:bg-white">
-                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-600 group-hover:text-white text-teal-600 transition duration-300">
-                        <i data-lucide="brain" class="w-5 h-5"></i>
+                <!-- Course Card 2 -->
+                <div class="p-8 rounded-[2rem] border border-slate-100 bg-slate-50 hover:shadow-xl hover:border-teal-100 transition duration-300 group text-left">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-600 transition duration-300">
+                        <i data-lucide="activity" class="text-teal-600 group-hover:text-white transition"></i>
                     </div>
-                    <h3 class="text-lg font-bold mb-2 text-slate-900 group-hover:text-teal-600 transition">Mental Health</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Therapeutic communication structures and safe crisis care support guidelines.</p>
+                    <h3 class="text-lg font-bold mb-3 text-slate-900">Health Assessment</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Mastering complex physical examinations, clinical documentation guidelines, and laboratory data diagnostics.</p>
                 </div>
-                <!-- Subject 6 -->
-                <div class="p-8 rounded-3xl border border-slate-150 bg-slate-50/50 hover:shadow-xl hover:border-teal-500/30 transition duration-300 group hover:bg-white">
-                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-600 group-hover:text-white text-teal-600 transition duration-300">
-                        <i data-lucide="baby" class="w-5 h-5"></i>
+                <!-- Course Card 3 -->
+                <div class="p-8 rounded-[2rem] border border-slate-100 bg-slate-50 hover:shadow-xl hover:border-teal-100 transition duration-300 group text-left">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-600 transition duration-300">
+                        <i data-lucide="heart-pulse" class="text-teal-600 group-hover:text-white transition"></i>
                     </div>
-                    <h3 class="text-lg font-bold mb-2 text-slate-900 group-hover:text-teal-600 transition">Maternal Newborn</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Labor and delivery mechanisms, obstetric emergencies, and intensive neonatal assessments.</p>
+                    <h3 class="text-lg font-bold mb-3 text-slate-900">Adult Health I & II</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Pathophysiological review, nursing care plans, and advanced Med-Surg management structures for acute patients.</p>
+                </div>
+                <!-- Course Card 4 -->
+                <div class="p-8 rounded-[2rem] border border-slate-100 bg-slate-50 hover:shadow-xl hover:border-teal-100 transition duration-300 group text-left">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-600 transition duration-300">
+                        <i data-lucide="pill" class="text-teal-600 group-hover:text-white transition"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3 text-slate-900">Pharmacology</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Calculations, medication classifications, side effects, therapeutic indicators, and safe dosage math calculations.</p>
+                </div>
+                <!-- Course Card 5 -->
+                <div class="p-8 rounded-[2rem] border border-slate-100 bg-slate-50 hover:shadow-xl hover:border-teal-100 transition duration-300 group text-left">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-600 transition duration-300">
+                        <i data-lucide="brain" class="text-teal-600 group-hover:text-white transition"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3 text-slate-900">Mental Health</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Interventions, psychiatric communication standards, pharmacology, and nursing clinical models for psychiatric diagnostics.</p>
+                </div>
+                <!-- Course Card 6 -->
+                <div class="p-8 rounded-[2rem] border border-slate-100 bg-slate-50 hover:shadow-xl hover:border-teal-100 transition duration-300 group text-left">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-600 transition duration-300">
+                        <i data-lucide="baby" class="text-teal-600 group-hover:text-white transition"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-3 text-slate-900">Maternal Newborn</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Maternity stages, labor management, infant assessment scales, and postpartum recovery guidelines.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Scheduling Module Card Section -->
-    <section id="schedule" class="py-20 bg-slate-50 relative">
+    <!-- Scheduling Section -->
+    <section id="schedule" class="py-20 bg-slate-50">
         <div class="max-w-5xl mx-auto px-4">
-            
-            <div class="bg-white rounded-[3rem] shadow-xl overflow-hidden border border-slate-200 flex flex-col md:flex-row relative">
-                
-                <!-- Left Sidebar: Coach Info -->
-                <div class="md:w-1/3 bg-slate-900 p-10 text-white flex flex-col justify-between relative overflow-hidden">
-                    <div class="absolute -left-16 -bottom-16 w-48 h-48 rounded-full bg-teal-500/5 blur-3xl"></div>
-                    
-                    <div class="relative z-10">
-                        <div class="flex items-center gap-3.5 mb-10 pb-6 border-b border-slate-800">
-                            <!-- Custom Fallback Avatar Image (Cole Ashton) -->
-                            <img src="profileimage.jpg" alt="Cole Ashton" onerror="this.src='https://placehold.co/100x100/0d9488/ffffff?text=Cole'" class="w-14 h-14 rounded-2xl object-cover border border-slate-700 shadow-md">
-                            <div>
-                                <p class="font-bold brand-font text-lg text-white">Cole Ashton</p>
-                                <p class="text-[10px] text-teal-400 font-bold tracking-widest uppercase">ADN Mentor Specialist</p>
-                            </div>
+            <div class="bg-white rounded-[3rem] shadow-xl overflow-hidden border border-slate-200 flex flex-col md:flex-row">
+                <!-- Mentorship Wizard Left Info -->
+                <div class="md:w-1/3 bg-slate-900 p-12 text-white flex flex-col">
+                    <div class="flex items-center gap-3 mb-10">
+                        <img id="wizardMentorImg" src="profileimage.jpg" alt="Cole Ashton" onerror="this.onerror=null;this.src='https://placehold.co/120x120/115e59/ffffff?text=Cole+Ashton';" class="w-14 h-14 rounded-2xl object-cover bg-teal-600 border border-slate-700 shadow-lg">
+                        <div>
+                            <p class="font-bold brand-font text-base text-white">Cole Ashton</p>
+                            <p class="text-xs text-teal-400 font-bold uppercase">ADN Mentor</p>
                         </div>
-                        
-                        <h3 class="text-2xl font-extrabold mb-4 brand-font text-white leading-snug">Private 1-on-1 Academic Session</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed mb-6">Select a date and secure high-priority learning time to prepare for your future as a clinician.</p>
                     </div>
-
-                    <div class="relative z-10 bg-slate-800/50 p-4 rounded-2xl border border-slate-800">
-                        <div class="flex items-center gap-2.5 text-teal-400 text-xs font-bold mb-1">
-                            <i data-lucide="clock" class="w-4 h-4"></i> Session Details
-                        </div>
-                        <p class="text-[11px] text-slate-300">Customized topic reviews, math worksheets, and test simulations over Zoom or Google Meet.</p>
-                    </div>
+                    <h3 class="text-2xl font-extrabold mb-4 brand-font text-white">1-on-1 Session</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-8">Select your course subject, select a preferred day, and click an open slot. Cole will confirm bookings individually in the system portal.</p>
+                    <p class="text-xs text-teal-300 italic">"Book a time and let's master those nursing concepts together."</p>
                 </div>
 
-                <!-- Right Core: Appointment Wizard Calendar -->
-                <div class="md:w-2/3 p-8 sm:p-12 relative min-h-[500px] flex flex-col justify-center">
-                    
-                    <!-- Calendar Screen Locking Banner (Prompt for non-logged students) -->
-                    <div id="bookingLock" class="absolute inset-0 bg-white/95 backdrop-blur-[4px] z-20 flex flex-col items-center justify-center p-8 text-center transition-all duration-300">
-                        <div class="p-4 bg-teal-50 rounded-full text-teal-600 mb-4 border border-teal-100">
+                <!-- Wizard Calendar Panels -->
+                <div class="md:w-2/3 p-12 relative">
+                    <div id="bookingLock" class="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-8 text-center">
+                        <div class="bg-teal-50 text-teal-700 p-4 rounded-3xl mb-6">
                             <i data-lucide="lock" class="w-8 h-8"></i>
                         </div>
-                        <h4 class="text-xl font-bold text-slate-900 brand-font mb-2">Sign In to Check Schedule Availability</h4>
-                        <p class="text-sm text-slate-500 max-w-sm mb-6">In order to access active booking slots and coordinate times, please authenticate.</p>
-                        <button onclick="toggleAuthOverlay()" class="px-8 py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-lg shadow-teal-600/10 active:scale-95 transition">
-                            Sign In to Schedule
-                        </button>
+                        <h4 class="text-lg font-bold text-slate-800 mb-2 brand-font">Student Authentication Required</h4>
+                        <p class="text-xs text-slate-500 max-w-xs mb-6">Please log in to view and secure available time slots for ADN course mentoring.</p>
+                        <button onclick="toggleAuthOverlay()" class="px-8 py-4 bg-teal-600 text-white font-bold rounded-2xl shadow-xl hover:bg-teal-700 transition">Sign In to Schedule</button>
                     </div>
-
-                    <!-- STEP 1: Date & Time Selector -->
-                    <div id="step-1" class="transition-all">
-                        <div class="mb-6 flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="bg-teal-50 text-teal-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase border border-teal-100">Step 1 of 2</span>
-                                <h4 class="text-sm text-slate-400 font-bold tracking-wider uppercase">Select Date</h4>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <button onclick="changeMonth(-1)" class="p-2 hover:bg-slate-100 rounded-xl transition border border-slate-200"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
-                                <button onclick="changeMonth(1)" class="p-2 hover:bg-slate-100 rounded-xl transition border border-slate-200"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    
+                    <div id="step-1">
+                        <div class="mb-8 flex items-center justify-between">
+                            <p class="text-xl font-extrabold text-slate-800 brand-font" id="monthDisplay">Loading...</p>
+                            <div class="flex gap-2">
+                                <button onclick="changeMonth(-1)" class="p-2 hover:bg-slate-100 rounded-xl transition"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
+                                <button onclick="changeMonth(1)" class="p-2 hover:bg-slate-100 rounded-xl transition"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
                             </div>
                         </div>
-
-                        <div class="mb-4">
-                            <p class="text-2xl font-extrabold text-slate-950 brand-font" id="monthDisplay">Loading calendar...</p>
+                        <div class="calendar-grid mb-2 text-[10px] font-black text-slate-400 text-center uppercase tracking-widest">
+                            <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
                         </div>
-
-                        <div class="calendar-grid mb-2 text-[10px] font-bold text-slate-400 text-center uppercase tracking-widest">
-                            <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
-                        </div>
-                        <div class="calendar-grid gap-1.5 mb-8" id="calendarDays"></div>
-                        
-                        <!-- Time selection area -->
-                        <div id="timeSelection" class="hidden border-t border-slate-100 pt-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                                <i data-lucide="clock" class="text-teal-600 w-4.5 h-4.5"></i> Select Time Slot
-                            </h4>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="timeSlots"></div>
-                            
-                            <button onclick="nextStep()" class="w-full mt-8 py-4 bg-slate-900 hover:bg-slate-800 text-white font-extrabold rounded-2xl shadow-xl transition active:scale-95 flex items-center justify-center gap-2">
-                                Continue Booking details <i data-lucide="arrow-right" class="w-4.5 h-4.5"></i>
-                            </button>
+                        <div class="calendar-grid gap-1 mb-10" id="calendarDays"></div>
+                        <div id="timeSelection" class="hidden">
+                            <h4 class="text-lg font-bold mb-5 brand-font text-slate-900 border-t border-slate-100 pt-8">Available Times</h4>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="timeSlots"></div>
+                            <button onclick="nextStep()" class="w-full mt-10 py-4 bg-teal-600 text-white font-extrabold rounded-2xl shadow-xl hover:bg-teal-700 transition">Continue</button>
                         </div>
                     </div>
-
-                    <!-- STEP 2: Subject & Content detail Form -->
-                    <div id="step-2" class="hidden transition-all">
-                        <button onclick="prevStep()" class="text-teal-600 font-bold mb-6 flex items-center gap-1.5 hover:underline text-xs">
-                            <i data-lucide="arrow-left" class="w-4 h-4"></i> Go Back
-                        </button>
-                        
-                        <div class="mb-6">
-                            <span class="bg-teal-50 text-teal-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase border border-teal-100">Step 2 of 2</span>
-                            <h4 class="text-xl font-bold text-slate-950 brand-font mt-1">Specify Session Details</h4>
-                            <p class="text-xs text-slate-500">Provide topics so Cole can prepare standard study templates.</p>
-                        </div>
-
+                    
+                    <div id="step-2" class="hidden">
+                        <button onclick="prevStep()" class="text-teal-600 font-bold mb-8 flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</button>
                         <div class="space-y-4">
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="flex flex-col gap-1.5">
-                                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">First Name</label>
-                                    <input type="text" id="bookingFirstName" placeholder="John" class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-teal-500 focus:bg-white text-sm font-medium transition">
-                                </div>
-                                <div class="flex flex-col gap-1.5">
-                                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Last Name</label>
-                                    <input type="text" id="bookingLastName" placeholder="Doe" class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-teal-500 focus:bg-white text-sm font-medium transition">
-                                </div>
+                                <input type="text" id="bookingFirstName" placeholder="First Name" class="p-4 bg-slate-50 border rounded-2xl outline-none focus:border-teal-500">
+                                <input type="text" id="bookingLastName" placeholder="Last Name" class="p-4 bg-slate-50 border rounded-2xl outline-none focus:border-teal-500">
                             </div>
-                            
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Class Format / Location</label>
-                                <input type="text" id="bookingLocation" value="ONLINE (Google Meet)" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-teal-500 focus:bg-white text-sm font-medium transition">
-                            </div>
-
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">ADN Subject Focus</label>
-                                <select id="bookingCourse" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-teal-500 focus:bg-white text-sm font-semibold transition text-slate-700">
-                                    <option>Introduction to Nursing</option>
-                                    <option>Health Assessment</option>
-                                    <option>Adult Health I</option>
-                                    <option>Adult Health II</option>
-                                    <option>Pharmacology</option>
-                                    <option>Mental Health</option>
-                                    <option>Maternal Newborn Health</option>
-                                </select>
-                            </div>
-
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Exam Chapters or Critical Areas to Review</label>
-                                <textarea id="bookingTopics" rows="3" placeholder="Explain what topics, quizzes, or specific lab calculations you need extra assistance with..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-teal-500 focus:bg-white text-sm font-medium transition"></textarea>
-                            </div>
-
-                            <button id="finalBookBtn" onclick="handleBooking()" class="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-extrabold rounded-2xl flex items-center justify-center gap-2.5 mt-4 shadow-xl shadow-teal-600/10 active:scale-95 transition duration-300">
-                                <span>Request Mentorship Session</span>
-                                <div id="bookingLoader" class="loader hidden"></div>
+                            <input type="text" id="bookingLocation" value="ONLINE" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-teal-500">
+                            <select id="bookingCourse" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-teal-500">
+                                <option>Introduction to Nursing</option>
+                                <option>Health Assessment</option>
+                                <option>Adult Health I</option>
+                                <option>Adult Health II</option>
+                                <option>Pharmacology</option>
+                                <option>Mental Health</option>
+                                <option>Maternal Newborn Health</option>
+                            </select>
+                            <textarea id="bookingTopics" rows="3" placeholder="Topics to cover..." class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-teal-500"></textarea>
+                            <button id="finalBookBtn" onclick="handleBooking()" class="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-extrabold rounded-2xl flex items-center justify-center gap-3 mt-6 shadow-lg transition">
+                                <span>Request Session</span><div id="bookingLoader" class="loader hidden"></div>
                             </button>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Custom Chat Assistance Widget -->
+    <!-- Chat Widget -->
     <div id="chatContainer" class="fixed bottom-6 right-6 z-[100] hidden">
-        <div id="chatWindow" class="hidden bg-white w-80 sm:w-96 h-[480px] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden mb-4 border border-slate-200/80 animate-in slide-in-from-bottom-5 duration-300">
-            <!-- Header -->
-            <div class="bg-slate-900 p-5 text-white flex justify-between items-center relative">
-                <div class="absolute -left-10 -top-10 w-24 h-24 rounded-full bg-teal-500/10 blur-xl"></div>
-                <div class="relative z-10 flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 border border-teal-500/20">
-                        <i data-lucide="message-square" class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                        <span class="font-bold text-sm block">ADN Messenger Help</span>
-                        <span class="text-[9px] text-teal-400 font-bold uppercase tracking-wider">With Cole Ashton</span>
-                    </div>
-                </div>
-                <button onclick="toggleChatWindow()" class="p-1 hover:bg-slate-800 rounded-lg transition"><i data-lucide="x" class="w-4.5 h-4.5"></i></button>
+        <div id="chatWindow" class="hidden bg-white w-80 h-96 rounded-[2rem] shadow-2xl flex flex-col overflow-hidden mb-4 border border-slate-200 animate-in fade-in slide-in-from-bottom-5 duration-300">
+            <div class="bg-teal-600 p-5 text-white flex justify-between items-center font-bold text-sm">
+                <span class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Chat with Cole
+                </span>
+                <button onclick="toggleChatWindow()"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            
-            <!-- Message thread container -->
-            <div id="chatMessages" class="flex-1 p-5 overflow-y-auto flex flex-col gap-4 text-xs bg-slate-50/50"></div>
-            
-            <!-- Text inputs -->
-            <div class="p-4 bg-white border-t border-slate-100 flex gap-2">
-                <input type="text" id="chatInput" placeholder="Write your message here..." class="flex-1 bg-slate-50 outline-none p-3.5 rounded-xl text-xs border border-slate-200 focus:border-teal-500 focus:bg-white font-medium" onkeydown="if(event.key === 'Enter') sendChatMessage()">
-                <button onclick="sendChatMessage()" class="bg-teal-600 hover:bg-teal-700 text-white p-3.5 rounded-xl transition flex-shrink-0 shadow-md shadow-teal-600/10"><i data-lucide="send" class="w-4 h-4"></i></button>
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 text-xs bg-slate-50"></div>
+            <div class="p-3 bg-white border-t flex gap-2">
+                <input type="text" id="chatInput" placeholder="Message Cole..." class="flex-1 bg-slate-50 outline-none p-3 rounded-xl text-xs" onkeydown="if(event.key === 'Enter') sendChatMessage()">
+                <button onclick="sendChatMessage()" class="bg-teal-600 text-white p-3 rounded-xl hover:bg-teal-700 transition"><i data-lucide="send" class="w-4 h-4"></i></button>
             </div>
         </div>
-        
-        <button onclick="toggleChatWindow()" class="bg-slate-950 hover:bg-teal-600 text-white w-16 h-16 rounded-[1.75rem] shadow-2xl flex items-center justify-center relative transition-all duration-300 transform hover:scale-105 active:scale-95 group">
-            <i data-lucide="message-square" class="w-6 h-6 transition-transform group-hover:rotate-6"></i>
-            <div id="chatBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-teal-500 border-2 border-white rounded-full hidden flex items-center justify-center animate-pulse">
-                <span class="text-[9px] font-black">!</span>
+        <button onclick="toggleChatWindow()" class="bg-teal-600 text-white w-16 h-16 rounded-3xl shadow-2xl flex items-center justify-center relative hover:scale-105 transition">
+            <i data-lucide="message-circle" class="w-7 h-7"></i>
+            <div id="chatBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white rounded-full hidden flex items-center justify-center animate-pulse">
+                <span class="text-[8px] font-black text-white">!</span>
             </div>
         </button>
     </div>
 
-    <!-- Student Authentication Overlay -->
+    <!-- Auth Modal -->
     <div id="authOverlay" class="fixed inset-0 z-[200] modal-backdrop flex items-center justify-center hidden p-4">
-        <div class="bg-white p-8 sm:p-10 rounded-[2.5rem] max-w-md w-full text-center shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300">
-            <div class="absolute -left-20 -top-20 w-44 h-44 rounded-full bg-teal-500/10 blur-3xl"></div>
-            
-            <div class="relative z-10">
-                <div class="w-12 h-12 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-teal-600 border border-teal-100">
-                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+        <div class="bg-white p-8 sm:p-10 rounded-[2.5rem] max-w-md w-full text-center shadow-2xl">
+            <h3 class="text-2xl font-extrabold mb-2 brand-font text-slate-900">Student Sign In</h3>
+            <p class="text-xs text-slate-400 mb-8">Access schedules, progress charts, and clinical invoices.</p>
+            <div class="space-y-4">
+                <button onclick="handleGoogleSignIn()" class="w-full py-4 border-2 rounded-2xl font-extrabold flex items-center justify-center gap-3 hover:bg-slate-50 transition border-slate-200">
+                    <i data-lucide="mail" class="text-red-500"></i> Google Authentication
+                </button>
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink mx-4 text-xs font-bold text-slate-400 uppercase tracking-widest">or</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
                 </div>
-                
-                <h3 class="text-2xl font-extrabold mb-2 brand-font text-slate-950">ADN Mentor Sign In</h3>
-                <p class="text-xs text-slate-500 mb-8 max-w-xs mx-auto">Access your learning portal, receipts, upcoming schedules, and private feedback lines.</p>
-                
-                <div class="space-y-4 text-left">
-                    <button onclick="handleGoogleSignIn()" class="w-full py-3.5 border border-slate-200 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:bg-slate-50 transition text-sm text-slate-700">
-                        <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69c-.29 1.5-.14 3.01-.97 4.29l3.07 2.38c1.8-1.66 2.84-4.11 2.84-7.24z"/><path fill="#34A853" d="M12 24c3.24 0 5.97-1.08 7.96-2.91l-3.07-2.38c-.9.6-2.01.96-3.21.96-2.46 0-4.54-1.66-5.29-3.89l-3.18 2.46C6.18 21.02 8.87 24 12 24z"/><path fill="#FBBC05" d="M6.71 15.78c-.2-.6-.31-1.24-.31-1.9s.11-1.3.31-1.9L3.53 9.52C2.75 11.07 2.3 12.82 2.3 14.68s.45 3.61 1.23 5.16l3.18-2.46z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 8.87 0 6.18 2.98 5.19 6.06l3.18 2.46c.75-2.23 2.83-3.89 5.29-3.89z"/></svg>
-                        Sign in with Google
-                    </button>
-                    
-                    <div class="flex items-center gap-2 my-4">
-                        <div class="h-px flex-1 bg-slate-200"></div>
-                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">or email password</span>
-                        <div class="h-px flex-1 bg-slate-200"></div>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div class="flex flex-col gap-1">
-                            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Email Address</label>
-                            <input type="email" id="authEmail" placeholder="e.g. john@university.edu" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-teal-500 focus:bg-white text-sm font-medium transition">
-                        </div>
-                        <div class="flex flex-col gap-1">
-                            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Password</label>
-                            <input type="password" id="authPassword" placeholder="••••••••" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-teal-500 focus:bg-white text-sm font-medium transition">
-                        </div>
-                    </div>
-
-                    <button onclick="handleEmailAuth()" class="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-extrabold rounded-xl transition text-sm text-center shadow-lg shadow-teal-600/10 mt-2">
-                        Sign In / Create Account
-                    </button>
-                    
-                    <div class="text-center pt-2">
-                        <button onclick="toggleAuthOverlay()" class="text-slate-400 hover:text-slate-600 text-xs font-semibold transition">Cancel & return</button>
-                    </div>
-                </div>
+                <input type="email" id="authEmail" placeholder="Email" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-teal-500">
+                <input type="password" id="authPassword" placeholder="Password" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:border-teal-500">
+                <button onclick="handleEmailAuth()" class="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-extrabold rounded-2xl transition shadow-lg shadow-teal-50">Sign In / Sign Up</button>
+                <button onclick="toggleAuthOverlay()" class="text-slate-400 text-xs font-bold hover:text-slate-600 block mx-auto pt-2">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- Script Module logic handling initialization, auth cycles and database synchronization -->
+    <!-- Script Operations -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Keep current Firebase and firestore logic 100% same
-        const firebaseConfig = { apiKey: "AIzaSyDRLarhK20JltsckgrZRVJBDt4A4FTkUSk", authDomain: "coleashtontut.firebaseapp.com", projectId: "coleashtontut", storageBucket: "coleashtontut.firebasestorage.app", messagingSenderId: "277509432126", appId: "1:277509432126:web:08c3221cbf3d1336a3c26f" };
-        const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), appId = "coleashtontut";
+        const firebaseConfig = { 
+            apiKey: "AIzaSyDRLarhK20JltsckgrZRVJBDt4A4FTkUSk", 
+            authDomain: "coleashtontut.firebaseapp.com", 
+            projectId: "coleashtontut", 
+            storageBucket: "coleashtontut.firebasestorage.app", 
+            messagingSenderId: "277509432126", 
+            appId: "1:277509432126:web:08c3221cbf3d1336a3c26f" 
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = "coleashtontut";
 
-        let currentUser = null, selectedDate = null, selectedTime = null, currentViewMonth = new Date().getMonth(), currentViewYear = new Date().getFullYear();
-        let adminSettings = { weeklySchedule: {}, blackoutDates: [], specificDateSlots: {} }, userSessions = [], chatMessagesLocal = [];
+        let currentUser = null;
+        let selectedDate = null;
+        let selectedTime = null;
+        let currentViewMonth = new Date().getMonth();
+        let currentViewYear = new Date().getFullYear();
+        let adminSettings = { weeklySchedule: {}, blackoutDates: [], specificDateSlots: {} };
+        let userSessions = [];
+        let chatMessagesLocal = [];
         let currentAnnouncementTime = null;
 
-        // Onboarding Tour state management
-        let activeTourStep = 0;
+        /* Onboarding Tour Steps Configuration */
         const tourSteps = [
-            {
-                title: "Academic Policy Agreement",
-                desc: "Welcome! To maintain strict guidelines, please acknowledge our Honor Code and attendance agreement to activate your dashboard access.",
-                target: "GUIDELINES"
-            },
-            {
-                title: "Live Student Hub",
-                desc: "This dashboard displays active, requested, and past sessions in real-time. Check mentor status values and view interactive receipt copies easily.",
-                target: "#studentPortalDashboardSection"
-            },
-            {
-                title: "Interactive Scheduler",
-                desc: "Ready to study? Pick open dates on our calendar, match empty times, list current subjects, and add notes to prepare for future exams.",
-                target: "#schedule"
-            },
-            {
-                title: "Cole's Messenger Assistance",
-                desc: "Have quick questions between review sessions? Click this floating icon to chat with Cole directly and review critical calculations.",
-                target: "#chatContainer"
-            }
+            { target: '#welcomeGreeting', title: 'Your Student Hub 👋', text: 'Greet Cole, view your upcoming appointments feed, review clinician feedback, and manage your course receipts directly from here.' },
+            { target: '#schedule', title: 'Schedule a Session 📅', text: 'Select a course, pick a slot on the dynamic calendar wizard, and submit your session request in seconds.' },
+            { target: '#chatContainer', title: 'Direct Messaging 💬', text: 'Have an urgent nursing concept or scheduling query? Open a real-time message thread with Cole.' }
         ];
+        let currentTourStep = 0;
 
         lucide.createIcons();
 
-        // Custom Toast system replacing alert()
-        window.showToast = (message, title = "System Alert", type = "info") => {
-            const toast = document.getElementById('customToast');
-            const iconContainer = document.getElementById('toastIconContainer');
-            const titleEl = document.getElementById('toastTitle');
-            const msgEl = document.getElementById('toastMessage');
-
-            titleEl.innerText = title;
-            msgEl.innerText = message;
-
-            // Apply theme classes
-            iconContainer.className = "p-2 rounded-xl text-white flex-shrink-0";
-            if (type === "success") {
-                iconContainer.classList.add("bg-emerald-500");
-                iconContainer.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
-            } else if (type === "error") {
-                iconContainer.classList.add("bg-rose-500");
-                iconContainer.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4"></i>`;
-            } else {
-                iconContainer.classList.add("bg-teal-500");
-                iconContainer.innerHTML = `<i data-lucide="info" class="w-4 h-4"></i>`;
-            }
+        /* Toast Notifications Utility */
+        window.showToast = (message, type = 'info') => {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-semibold transition-all transform translate-y-2 opacity-0 duration-300 pointer-events-auto ${
+                type === 'success' ? 'bg-teal-600 text-white' : 
+                type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-white'
+            }`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-triangle' : 'info'}" class="w-4 h-4 flex-shrink-0"></i>
+                <span>${message}</span>
+            `;
+            toastContainer.appendChild(toast);
             lucide.createIcons();
-
-            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-10');
-            toast.classList.add('opacity-100', 'translate-y-0');
-
             setTimeout(() => {
-                dismissToast();
-            }, 6000);
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         };
 
-        window.dismissToast = () => {
-            const toast = document.getElementById('customToast');
-            toast.classList.remove('opacity-100', 'translate-y-0');
-            toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-10');
-        };
-
-        // Site Announcements Logic
+        /* Site Announcements Logic */
         onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'announcement'), (docSnap) => {
             const banner = document.getElementById('globalAnnouncementBanner');
             if (docSnap.exists()) {
@@ -866,7 +523,6 @@
                     currentAnnouncementTime = data.updatedAt || Date.now();
                     const dismissedTime = localStorage.getItem('dismissedAlertTime');
 
-                    // Show if they haven't dismissed it, OR if it has been updated since their last dismissal
                     if (!dismissedTime || parseInt(dismissedTime) < currentAnnouncementTime) {
                         document.getElementById('announcementText').innerText = data.message;
                         const linkEl = document.getElementById('announcementLink');
@@ -877,18 +533,17 @@
                             linkEl.classList.add('hidden');
                         }
 
-                        // Apply themes
                         const bgEl = document.getElementById('announcementBg');
                         bgEl.className = 'px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between shadow-md transition-colors';
                         
                         if (data.theme === 'red') {
-                            bgEl.classList.add('bg-red-600', 'text-white');
+                            bgEl.classList.add('bg-rose-600', 'text-white');
                         } else if (data.theme === 'green') {
-                            bgEl.classList.add('bg-green-600', 'text-white');
+                            bgEl.classList.add('bg-teal-600', 'text-white');
                         } else if (data.theme === 'amber') {
                             bgEl.classList.add('bg-amber-400', 'text-slate-900');
                         } else {
-                            bgEl.classList.add('bg-teal-600', 'text-white'); // default brand color
+                            bgEl.classList.add('bg-teal-600', 'text-white');
                         }
 
                         banner.classList.remove('hidden');
@@ -911,7 +566,7 @@
             document.getElementById('globalAnnouncementBanner').classList.add('hidden');
         };
 
-        // Availability settings logic
+        /* Availability settings logic */
         onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'availability'), (docSnap) => {
             if (docSnap.exists()) { 
                 adminSettings = docSnap.data(); 
@@ -920,186 +575,28 @@
             }
         });
 
+        /* Authentication changed listener */
         onAuthStateChanged(auth, (user) => {
             currentUser = user; 
             const isLogged = !!user;
+            
             document.getElementById('loginNavBtn').classList.toggle('hidden', isLogged);
             document.getElementById('userInfo').classList.toggle('hidden', !isLogged);
             document.getElementById('bookingLock').classList.toggle('hidden', isLogged);
             document.getElementById('chatContainer').classList.toggle('hidden', !isLogged);
             
-            // Toggle dashboard visibility inside portal
-            const marketingHero = document.getElementById('marketingHero');
-            const aboutMeSection = document.getElementById('aboutMeSection');
-            const studentPortalSec = document.getElementById('studentPortalDashboardSection');
-            const navAboutLink = document.getElementById('navAboutLink');
-            
+            // Toggle landing vs dashboard view
+            document.getElementById('loggedOutHero').classList.toggle('hidden', isLogged);
+            document.getElementById('loggedInDashboard').classList.toggle('hidden', !isLogged);
+
             if (isLogged) {
                 document.getElementById('authOverlay').classList.add('hidden');
-                const displayName = user.displayName || user.email.split('@')[0];
-                document.getElementById('userNameDisplay').innerText = displayName;
-                document.getElementById('welcomeName').innerText = displayName;
-                
-                // Initialize modern initials-based avatar
-                const initials = displayName.substring(0, 2).toUpperCase();
-                document.getElementById('userAvatar').innerText = initials;
-
-                marketingHero.classList.add('hidden');
-                aboutMeSection.classList.add('hidden'); // Hide the about me section when logged in
-                if (navAboutLink) navAboutLink.classList.add('hidden'); // Hide from header menu
-                studentPortalSec.classList.remove('hidden');
-                
+                document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
+                document.getElementById('welcomeGreeting').innerText = `Hey there, ${user.displayName || user.email.split('@')[0]}! 👋`;
                 initUserData();
-                checkOnboardingStatus();
-            } else {
-                marketingHero.classList.remove('hidden');
-                aboutMeSection.classList.remove('hidden'); // Show when visitor is checking you out
-                if (navAboutLink) navAboutLink.classList.remove('hidden');
-                studentPortalSec.classList.add('hidden');
-                // Ensure tour overlays are hidden on logout
-                document.getElementById('tourOverlay').classList.add('hidden');
-                document.getElementById('tourPointerCard').classList.add('hidden');
+                checkOnboarding(user);
             }
         });
-
-        // Check if user needs the guided onboarding tour
-        async function checkOnboardingStatus() {
-            if (!currentUser) return;
-            const onboardingRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'onboarding');
-            try {
-                const onboardingSnap = await getDoc(onboardingRef);
-                if (!onboardingSnap.exists() || !onboardingSnap.data().completed) {
-                    startOnboardingTour();
-                }
-            } catch (err) {
-                console.error("Failed to fetch onboarding metadata, using fallback system", err);
-                // Fail-safe: assume they completed if permission errors occur
-            }
-        }
-
-        // Initialize onboarding system
-        function startOnboardingTour() {
-            activeTourStep = 0;
-            document.getElementById('tourOverlay').classList.remove('hidden');
-            renderActiveTourStep();
-        }
-
-        // Render current tour pointers and highlight targets dynamically
-        function renderActiveTourStep() {
-            const step = tourSteps[activeTourStep];
-            
-            // Clean up any old spotlights
-            document.querySelectorAll('.tour-spotlight-active').forEach(el => {
-                el.classList.remove('tour-spotlight-active');
-            });
-
-            const overlay = document.getElementById('tourOverlay');
-            const guidesCard = document.getElementById('tourGuidelinesCard');
-            const pointerCard = document.getElementById('tourPointerCard');
-
-            if (step.target === 'GUIDELINES') {
-                overlay.classList.remove('hidden', 'bg-transparent', 'backdrop-blur-none', 'pointer-events-none');
-                overlay.classList.add('bg-slate-900/60', 'backdrop-blur-sm');
-                pointerCard.classList.add('hidden');
-                guidesCard.classList.remove('hidden');
-            } else {
-                // Spotlight steps: Hide main overlay entirely so it doesn't clip, block pointer events, or double darken
-                overlay.classList.remove('bg-slate-900/60', 'backdrop-blur-sm');
-                overlay.classList.add('bg-transparent', 'backdrop-blur-none', 'pointer-events-none', 'hidden');
-
-                pointerCard.classList.remove('hidden');
-                guidesCard.classList.add('hidden');
-
-                // Set step badge details
-                document.getElementById('tourStepBadge').innerText = `Step ${activeTourStep + 1} of ${tourSteps.length}`;
-                document.getElementById('tourStepTitle').innerText = step.title;
-                document.getElementById('tourStepDesc').innerText = step.desc;
-
-                // Configure next button texts
-                const isLast = (activeTourStep === tourSteps.length - 1);
-                document.getElementById('tourNextBtn').innerHTML = isLast ? 
-                    `Finish Setup <i data-lucide="check" class="w-3.5 h-3.5"></i>` : 
-                    `Next Section <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`;
-                lucide.createIcons();
-
-                // Dynamic spotlight positioning
-                const targetElement = document.querySelector(step.target);
-                if (targetElement) {
-                    // Smoothly scroll element to center
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    
-                    // Add spotlight highlighting styles
-                    targetElement.classList.add('tour-spotlight-active');
-
-                    // Calculate positioning coordinates
-                    setTimeout(() => {
-                        const rect = targetElement.getBoundingClientRect();
-                        const cardWidth = 384; // max-w-sm tailwind width in px
-                        
-                        // Default position offset above target
-                        let top = (rect.top + window.scrollY) - 210;
-                        let left = (rect.left + window.scrollX) + (rect.width / 2) - (cardWidth / 2);
-                        
-                        // Prevent left boundary clipping
-                        if (left < 16) left = 16;
-                        // Prevent right clipping
-                        if (left + cardWidth > window.innerWidth - 16) {
-                            left = window.innerWidth - cardWidth - 16;
-                        }
-
-                        // Configure pointer card values
-                        pointerCard.style.top = `${top}px`;
-                        pointerCard.style.left = `${left}px`;
-                        
-                        // Place helper pointing arrow dynamically
-                        const arrow = document.getElementById('tourPointerArrow');
-                        arrow.style.bottom = "-8px";
-                        arrow.style.top = "auto";
-                        arrow.style.left = `${(rect.left + window.scrollX + (rect.width / 2)) - left - 8}px`;
-                        arrow.style.borderRightWidth = "1px";
-                        arrow.style.borderBottomWidth = "1px";
-                        arrow.style.borderLeftWidth = "0px";
-                        arrow.style.borderTopWidth = "0px";
-                    }, 500);
-                } else {
-                    // Center fallback if elements are hidden
-                    pointerCard.style.top = "50%";
-                    pointerCard.style.left = "50%";
-                    pointerCard.style.transform = "translate(-50%, -50%)";
-                    document.getElementById('tourPointerArrow').classList.add('hidden');
-                }
-            }
-        }
-
-        // Advance to next tour state or save progress
-        window.advanceTour = async () => {
-            activeTourStep++;
-            if (activeTourStep < tourSteps.length) {
-                renderActiveTourStep();
-            } else {
-                await skipTour(); // Complete tour sequence
-            }
-        }
-
-        // Skip onboarding and save metadata state securely (RULE 1 compliant path)
-        window.skipTour = async () => {
-            // Remove target spotlights
-            document.querySelectorAll('.tour-spotlight-active').forEach(el => {
-                el.classList.remove('tour-spotlight-active');
-            });
-            document.getElementById('tourOverlay').classList.add('hidden');
-            document.getElementById('tourPointerCard').classList.add('hidden');
-            
-            if (currentUser) {
-                const onboardingRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'onboarding');
-                try {
-                    await setDoc(onboardingRef, { completed: true, completedAt: serverTimestamp() });
-                    showToast("Guidelines agreed and system tutorial complete. Welcome to Ashton Nursing Mentorship!", "Portal Activated", "success");
-                } catch (err) {
-                    console.error("Failed to commit onboarding status to database", err);
-                }
-            }
-        }
 
         function initUserData() {
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'bookings')), (snapshot) => {
@@ -1118,163 +615,200 @@
             });
         }
 
-        window.toggleAppointmentsSuite = () => document.getElementById('appointmentsSuite').classList.toggle('hidden');
+        window.scrollToDashboard = () => {
+            document.getElementById('loggedInDashboard').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        /* Check onboarding completion status */
+        async function checkOnboarding(user) {
+            try {
+                const docSnap = await getDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'onboarding', 'state'));
+                if (!docSnap.exists() || !docSnap.data().completed) {
+                    document.getElementById('guidelinesOverlay').classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error("Error reading onboarding status:", err);
+            }
+        }
+
+        window.acceptGuidelines = () => {
+            window.startTour();
+        };
+
+        window.startTour = () => {
+            document.getElementById('guidelinesOverlay').classList.add('hidden');
+            document.getElementById('tourOverlay').classList.remove('hidden');
+            window.showTourStep(0);
+        };
+
+        window.showTourStep = (index) => {
+            // Check boundaries using equality to avoid XML parse issues
+            if (index === -1 || index >= tourSteps.length) {
+                window.endTour();
+                return;
+            }
+            currentTourStep = index;
+            const step = tourSteps[index];
+            const target = document.querySelector(step.target);
+
+            if (!target) {
+                window.showTourStep(index + 1);
+                return;
+            }
+
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            setTimeout(() => {
+                const rect = target.getBoundingClientRect();
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+                const spotlight = document.getElementById('tourSpotlight');
+                spotlight.style.top = `${rect.top + scrollTop - 12}px`;
+                spotlight.style.left = `${rect.left + scrollLeft - 12}px`;
+                spotlight.style.width = `${rect.width + 24}px`;
+                spotlight.style.height = `${rect.height + 24}px`;
+
+                document.getElementById('tourStepTitle').innerText = step.title;
+                document.getElementById('tourStepText').innerText = step.text;
+                document.getElementById('tourStepProgress').innerText = `Step ${index + 1} of ${tourSteps.length}`;
+
+                const nextBtn = document.getElementById('tourNextBtn');
+                if (index === tourSteps.length - 1) {
+                    nextBtn.innerHTML = '<span>Complete Tour 🎉</span>';
+                } else {
+                    nextBtn.innerHTML = '<span>Next Step</span><i data-lucide="arrow-right" class="w-4 h-4"></i>';
+                }
+                lucide.createIcons();
+
+                const pointerCard = document.getElementById('tourPointerCard');
+                pointerCard.classList.remove('hidden');
+                
+                const tooltipWidth = pointerCard.offsetWidth || 350;
+                const tooltipHeight = pointerCard.offsetHeight || 220;
+
+                let topPos = rect.bottom + scrollTop + 20;
+                let leftPos = rect.left + scrollLeft + (rect.width / 2) - (tooltipWidth / 2);
+
+                const viewportWidth = window.innerWidth;
+                const safetyMargin = 16;
+                if (leftPos < safetyMargin) {
+                    leftPos = safetyMargin;
+                } else if (leftPos + tooltipWidth > viewportWidth - safetyMargin) {
+                    leftPos = viewportWidth - tooltipWidth - safetyMargin;
+                }
+
+                const relativeBottom = rect.bottom;
+                if (relativeBottom + tooltipHeight + 50 > window.innerHeight) {
+                    const potentialTop = rect.top + scrollTop - tooltipHeight - 20;
+                    if (potentialTop > scrollTop + safetyMargin) {
+                        topPos = potentialTop;
+                    }
+                }
+
+                pointerCard.style.top = `${topPos}px`;
+                pointerCard.style.left = `${leftPos}px`;
+            }, 600);
+        };
+
+        window.prevTourStep = () => {
+            window.showTourStep(currentTourStep - 1);
+        };
+
+        window.nextTourStep = () => {
+            window.showTourStep(currentTourStep + 1);
+        };
+
+        window.endTour = async () => {
+            document.getElementById('tourOverlay').classList.add('hidden');
+            document.getElementById('tourPointerCard').classList.add('hidden');
+            if (currentUser) {
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'onboarding', 'state'), {
+                        completed: true,
+                        completedAt: serverTimestamp()
+                    });
+                    window.showToast("Guided tour complete. Welcome to your portal!", "success");
+                } catch (e) {
+                    console.error("Error writing onboarding completion:", e);
+                }
+            }
+        };
 
         function renderUserSessions() {
-            // Render inside both detailed modal AND the visual Portal Dashboard
-            const detailList = document.getElementById('studentAppointmentsList');
-            const portalDashboardList = document.getElementById('portalDashboardAppointments');
-            
-            const noSessionsHTML = `
-                <div class="flex flex-col items-center justify-center p-12 text-center bg-white rounded-3xl border border-slate-100">
-                    <div class="p-4 bg-slate-50 text-slate-400 rounded-full mb-3">
-                        <i data-lucide="calendar" class="w-8 h-8"></i>
-                    </div>
-                    <p class="text-slate-700 text-sm font-bold">No sessions scheduled yet</p>
-                    <p class="text-xs text-slate-400 mt-1 max-w-xs">Ready to begin? Use the calendar tool below to request your first 1-on-1 ADN preparation slot.</p>
-                </div>
-            `;
-
+            const list = document.getElementById('studentAppointmentsList');
             if (userSessions.length === 0) { 
-                detailList.innerHTML = noSessionsHTML; 
-                portalDashboardList.innerHTML = noSessionsHTML;
-                document.getElementById('sessionCountBadge').innerText = '0 Sessions';
-                document.getElementById('sessionProgressBar').style.width = '5%';
+                list.innerHTML = `
+                    <div class="text-center py-12 px-4 border border-dashed border-slate-200 rounded-[2rem]">
+                        <i data-lucide="calendar-off" class="w-8 h-8 text-slate-300 mx-auto mb-3"></i>
+                        <p class="text-xs text-slate-400 italic">No appointments found. Use the calendar scheduler below to book a slot.</p>
+                    </div>
+                `; 
                 lucide.createIcons();
                 return; 
             }
-
-            // Update user progress metrics
-            const completedCount = userSessions.filter(s => s.status === 'completed' || s.status === 'confirmed').length;
-            document.getElementById('sessionCountBadge').innerText = `${completedCount} Session${completedCount !== 1 ? 's' : ''}`;
-            const progressPct = Math.min(100, Math.max(5, completedCount * 10));
-            document.getElementById('sessionProgressBar').style.width = `${progressPct}%`;
-
-            detailList.innerHTML = '';
-            portalDashboardList.innerHTML = '';
-
-            const sortedSessions = [...userSessions].sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-
-            sortedSessions.forEach((session, idx) => {
+            list.innerHTML = '';
+            userSessions.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)).forEach(session => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-6 rounded-3xl border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-md transition duration-300";
                 const styles = { 
-                    requested: 'bg-amber-50 text-amber-700 border-amber-200/60', 
-                    confirmed: 'bg-emerald-50 text-emerald-700 border-emerald-200/60', 
-                    cancelled: 'bg-rose-50 text-rose-700 border-rose-200/60', 
-                    completed: 'bg-teal-50 text-teal-700 border-teal-200/60' 
+                    requested: 'bg-amber-50 text-amber-600 border border-amber-100', 
+                    confirmed: 'bg-teal-50 text-teal-700 border border-teal-100', 
+                    cancelled: 'bg-rose-50 text-rose-600 border border-rose-100', 
+                    completed: 'bg-slate-100 text-slate-700 border border-slate-200' 
                 };
-                
-                const badgeDotColor = {
-                    requested: 'bg-amber-400',
-                    confirmed: 'bg-emerald-500',
-                    cancelled: 'bg-rose-500',
-                    completed: 'bg-teal-500'
-                };
-
-                // Elements for Detailed Modal List
-                const modalDiv = document.createElement('div');
-                modalDiv.className = "bg-white p-6 rounded-3xl border border-slate-200/80 flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-sm hover:shadow-md transition duration-200";
-                modalDiv.innerHTML = `
-                    <div class="flex items-start gap-4">
-                        <div class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-600">
-                            <i data-lucide="book-open" class="w-5 h-5"></i>
+                div.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full ${session.status === 'confirmed' ? 'bg-teal-500' : session.status === 'requested' ? 'bg-amber-400' : 'bg-slate-400'}"></span>
+                            <p class="font-extrabold text-slate-900 text-sm leading-none">${session.scheduledDate} &bull; ${session.scheduledTime}</p>
                         </div>
-                        <div>
-                            <p class="font-extrabold text-slate-900 text-sm sm:text-base">${session.scheduledDate} <span class="text-slate-400 font-medium">@</span> ${session.scheduledTime}</p>
-                            <div class="flex flex-wrap gap-2 items-center mt-1.5">
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-teal-600 bg-teal-50 border border-teal-100 px-2 py-0.5 rounded-md">${session.course}</span>
-                                <span class="text-[10px] text-slate-500 font-medium">Loc: ${session.location || 'Online'}</span>
-                            </div>
-                        </div>
+                        <p class="text-[10px] font-bold uppercase text-teal-600 tracking-wider">${session.course}</p>
+                        ${session.topics ? `<p class="text-xs text-slate-400 mt-1 italic">"${session.topics}"</p>` : ''}
                     </div>
-                    <div class="flex items-center gap-3 self-end sm:self-center">
-                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase border flex items-center gap-1.5 ${styles[session.status] || 'bg-slate-50 border-slate-200'}">
-                            <span class="w-1.5 h-1.5 rounded-full ${badgeDotColor[session.status] || 'bg-slate-400'}"></span>
-                            ${session.status.toUpperCase()}
-                        </span>
-                        ${session.status === 'completed' ? `<button onclick="showInvoice('${session.id}')" class="bg-teal-600 hover:bg-teal-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-sm">Receipt</button>` : ''}
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider ${styles[session.status] || 'bg-slate-100'}">${session.status.toUpperCase()}</span>
+                        ${session.status === 'completed' ? `<button onclick="showInvoice('${session.id}')" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-xl text-[10px] font-bold transition flex items-center gap-1.5 shadow-sm"><i data-lucide="receipt" class="w-3.5 h-3.5"></i> RECEIPT</button>` : ''}
                     </div>`;
-                detailList.appendChild(modalDiv);
-
-                // Elements for Dashboard Feed (Limit to top 3 slots to avoid crowding)
-                if (idx < 3) {
-                    const dashboardDiv = document.createElement('div');
-                    dashboardDiv.className = "bg-white p-5 rounded-3xl border border-slate-200/80 hover:border-slate-300 shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4";
-                    dashboardDiv.innerHTML = `
-                        <div class="flex items-center gap-4">
-                            <div class="p-3 bg-teal-50 border border-teal-100 rounded-2xl text-teal-600">
-                                <i data-lucide="calendar-check" class="w-5 h-5"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-slate-900 text-sm">${session.scheduledDate} at ${session.scheduledTime}</h4>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-[10px] font-semibold text-slate-500">${session.course}</span>
-                                    <span class="text-slate-300">•</span>
-                                    <span class="text-[10px] text-slate-400">Class format: ${session.location || 'Online'}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2 sm:self-center self-end">
-                            <span class="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase border flex items-center gap-1 ${styles[session.status] || 'bg-slate-50 border-slate-200'}">
-                                <span class="w-1.5 h-1.5 rounded-full ${badgeDotColor[session.status] || 'bg-slate-400'}"></span>
-                                ${session.status.toUpperCase()}
-                            </span>
-                            ${session.status === 'completed' ? `<button onclick="showInvoice('${session.id}')" class="text-teal-600 hover:bg-teal-50 px-3 py-1 rounded-lg text-xs font-bold transition">View Receipt</button>` : ''}
-                        </div>
-                    `;
-                    portalDashboardList.appendChild(dashboardDiv);
-                }
+                list.appendChild(div);
             });
-
-            // If there were more than 3, add a helpful quick button in the portal board
-            if (sortedSessions.length > 3) {
-                const viewAllBtn = document.createElement('button');
-                viewAllBtn.className = "w-full py-3.5 border border-dashed border-slate-200 text-slate-500 hover:text-teal-600 hover:border-teal-300 hover:bg-teal-50/20 text-xs font-bold rounded-2xl transition flex items-center justify-center gap-1.5";
-                viewAllBtn.innerHTML = `<i data-lucide="plus" class="w-4 h-4"></i> View All ${sortedSessions.length} Registered Schedules`;
-                viewAllBtn.onclick = () => toggleAppointmentsSuite();
-                portalDashboardList.appendChild(viewAllBtn);
-            }
-
             lucide.createIcons();
         }
 
         window.showInvoice = (id) => {
             const s = userSessions.find(x => x.id === id);
+            if (!s) return;
             const modal = document.createElement('div');
-            modal.className = "fixed inset-0 bg-slate-900/80 z-[300] flex items-center justify-center p-4 modal-backdrop";
+            modal.className = "fixed inset-0 bg-slate-900/80 z-[300] flex items-center justify-center p-4";
             modal.innerHTML = `
-                <div class="bg-white w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 relative border border-slate-200">
-                    <div class="bg-slate-900 p-8 text-white relative">
-                        <div class="absolute -right-10 -bottom-10 w-32 h-32 rounded-full bg-teal-500/10 blur-xl"></div>
-                        <h3 class="text-2xl font-extrabold brand-font tracking-tight uppercase">Session Receipt</h3>
-                        <p class="text-xs text-slate-400 mt-1">Professional Nursing Mentorship Invoice</p>
+                <div class="bg-white w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+                    <div class="bg-teal-600 p-8 text-white">
+                        <h3 class="text-xl font-black uppercase tracking-wide brand-font mb-1">Session Invoice</h3>
+                        <p class="text-xs opacity-80">Professional Nursing Mentorship</p>
                     </div>
                     <div class="p-8 space-y-6">
-                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Course Reference</span>
-                            <span class="text-xs font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md">${s.course}</span>
+                        <div class="flex justify-between border-b border-slate-100 pb-2.5">
+                            <span class="text-xs font-bold text-slate-400 uppercase">Subject</span>
+                            <span class="text-xs font-bold text-slate-800">${s.course}</span>
                         </div>
-                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Mentorship Hours</span>
-                            <span class="text-xs font-bold text-slate-800">${s.hours || 0} hrs total</span>
+                        <div class="flex justify-between border-b border-slate-100 pb-2.5">
+                            <span class="text-xs font-bold text-slate-400 uppercase">Duration</span>
+                            <span class="text-xs font-bold text-slate-800">${s.hours || 1} hr(s)</span>
                         </div>
-                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Billed Amt</span>
-                            <span class="text-2xl font-black text-teal-600">$${(s.totalBilled || 0).toFixed(2)}</span>
+                        <div class="flex justify-between border-b border-slate-100 pb-2.5">
+                            <span class="text-xs font-bold text-slate-400 uppercase">Total Billed</span>
+                            <span class="text-lg font-black text-teal-600">$${(s.totalBilled || 0).toFixed(2)}</span>
                         </div>
-                        
-                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/50">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                                <i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i> Mentor Comments & Advice
-                            </p>
-                            <p class="text-xs text-slate-600 leading-relaxed italic border-l-2 border-teal-500 pl-3">${s.tutorComments || 'Standard clinical topic & exam calculations review.'}</p>
+                        <div class="space-y-2">
+                            <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Clinical Notes & Feedback</p>
+                            <p class="text-[11px] text-slate-600 leading-relaxed italic border-l-2 border-teal-200 pl-3">${s.tutorComments || 'Comprehensive review of course objectives. Well prepared.'}</p>
                         </div>
-                        
-                        <button onclick="this.closest('.fixed').remove()" class="w-full py-4 bg-slate-950 hover:bg-slate-900 text-white rounded-2xl font-bold mt-4 shadow-xl active:scale-95 transition">Close Receipt</button>
+                        <button onclick="this.closest('.fixed').remove()" class="w-full py-4 bg-slate-900 hover:bg-black text-white rounded-2xl font-bold mt-4 shadow-xl transition">Close Receipt</button>
                     </div>
                 </div>`;
             document.body.appendChild(modal);
             lucide.createIcons();
-        }
+        };
 
         window.toggleChatWindow = () => {
             document.getElementById('chatWindow').classList.toggle('hidden');
@@ -1284,7 +818,8 @@
         };
 
         window.sendChatMessage = async () => {
-            const input = document.getElementById('chatInput'), msg = input.value.trim();
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
             if (!msg || !currentUser) return;
             const chatRef = doc(db, 'artifacts', appId, 'public', 'data', 'chats', currentUser.uid);
             await setDoc(chatRef, { 
@@ -1296,14 +831,14 @@
                 }] 
             }, { merge: true });
             input.value = '';
-        }
+        };
 
         function renderChatMessages(messages) {
             const container = document.getElementById('chatMessages'); 
             container.innerHTML = '';
             messages.forEach(m => {
                 const div = document.createElement('div'); 
-                div.className = `p-3.5 max-w-[85%] text-xs font-medium leading-relaxed ${m.sender === 'student' ? 'chat-bubble-user' : 'chat-bubble-admin'}`;
+                div.className = `p-3 max-w-[85%] text-[11px] font-bold ${m.sender === 'student' ? 'chat-bubble-user' : 'chat-bubble-admin shadow-sm border border-slate-200'}`;
                 div.innerHTML = `<p>${m.text}</p><span class="block text-[8px] opacity-60 mt-1 text-right">${m.time}</span>`;
                 container.appendChild(div);
             });
@@ -1314,7 +849,10 @@
             const calendarDays = document.getElementById('calendarDays'); 
             calendarDays.innerHTML = '';
             document.getElementById('monthDisplay').innerText = `${new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(currentViewYear, currentViewMonth))} ${currentViewYear}`;
-            const firstDay = new Date(currentViewYear, currentViewMonth, 1).getDay(), daysInMonth = new Date(currentViewYear, currentViewMonth + 1, 0).getDate(), today = new Date(); 
+            
+            const firstDay = new Date(currentViewYear, currentViewMonth, 1).getDay();
+            const daysInMonth = new Date(currentViewYear, currentViewMonth + 1, 0).getDate();
+            const today = new Date(); 
             today.setHours(0,0,0,0);
             
             for (let i = 0; i < firstDay; i++) {
@@ -1322,8 +860,12 @@
             }
             
             for (let i = 1; i <= daysInMonth; i++) {
-                const dStr = `${currentViewYear}-${String(currentViewMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`, dayOfWeek = new Date(currentViewYear, currentViewMonth, i).getDay();
-                const isBlackout = adminSettings.blackoutDates?.includes(dStr), dayOverride = adminSettings.specificDateSlots?.[dStr], dayWeekly = adminSettings.weeklySchedule?.[dayOfWeek];
+                const dStr = `${currentViewYear}-${String(currentViewMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const dayOfWeek = new Date(currentViewYear, currentViewMonth, i).getDay();
+                
+                const isBlackout = adminSettings.blackoutDates?.includes(dStr);
+                const dayOverride = adminSettings.specificDateSlots?.[dStr];
+                const dayWeekly = adminSettings.weeklySchedule?.[dayOfWeek];
                 const slotsAvailable = dayOverride ? (dayOverride.slots || []).length : (dayWeekly?.disabled ? 0 : (dayWeekly?.slots || []).length);
                 
                 const btn = document.createElement('button'); 
@@ -1334,8 +876,8 @@
                     btn.className += " text-slate-300 pointer-events-none";
                 } else {
                     btn.onclick = () => { 
-                        document.querySelectorAll('#calendarDays button').forEach(b => b.classList.remove('bg-teal-600', 'text-white', 'shadow-md')); 
-                        btn.classList.add('bg-teal-600', 'text-white', 'shadow-md'); 
+                        document.querySelectorAll('#calendarDays button').forEach(b => b.classList.remove('bg-teal-600', 'text-white')); 
+                        btn.classList.add('bg-teal-600', 'text-white'); 
                         selectedDate = dStr; 
                         renderTimeSlots(); 
                     };
@@ -1348,7 +890,10 @@
             const container = document.getElementById('timeSlots'); 
             container.innerHTML = ''; 
             document.getElementById('timeSelection').classList.remove('hidden');
-            const dayOfWeek = new Date(selectedDate + "T12:00:00").getDay(), override = adminSettings.specificDateSlots?.[selectedDate], slots = override ? (override.slots || []) : (adminSettings.weeklySchedule?.[dayOfWeek]?.slots || []);
+            
+            const dayOfWeek = new Date(selectedDate + "T12:00:00").getDay();
+            const override = adminSettings.specificDateSlots?.[selectedDate];
+            const slots = override ? (override.slots || []) : (adminSettings.weeklySchedule?.[dayOfWeek]?.slots || []);
             
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'bookings')), (snap) => {
                 const all = snap.docs.map(d => d.data()); 
@@ -1358,12 +903,12 @@
                     const isTaken = all.some(b => b.scheduledDate === selectedDate && b.scheduledTime === t && b.status !== 'cancelled');
                     const btn = document.createElement('button'); 
                     btn.innerText = t; 
-                    btn.className = `time-slot border border-slate-200 py-3.5 px-3.5 rounded-2xl text-xs font-extrabold transition ${isTaken ? 'disabled' : 'bg-slate-50 text-slate-700'}`;
+                    btn.className = `time-slot border border-slate-200 py-4 px-4 rounded-2xl text-xs font-black transition ${isTaken ? 'disabled bg-slate-100 opacity-50' : 'bg-slate-50'}`;
                     
                     if (!isTaken) {
                         btn.onclick = () => { 
-                            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected')); 
-                            btn.classList.add('selected'); 
+                            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected', 'bg-teal-600', 'text-white')); 
+                            btn.classList.add('selected', 'bg-teal-600', 'text-white'); 
                             selectedTime = t; 
                         };
                     }
@@ -1373,9 +918,11 @@
         }
 
         window.handleBooking = async () => {
-            const fName = document.getElementById('bookingFirstName').value, lName = document.getElementById('bookingLastName').value;
+            const fName = document.getElementById('bookingFirstName').value.trim();
+            const lName = document.getElementById('bookingLastName').value.trim();
             if (!fName || !lName || !selectedTime) {
-                return showToast("Please ensure your First Name, Last Name and time slot are fully filled in.", "Required Fields", "error");
+                window.showToast("Please enter your name details and select an available time.", "error");
+                return;
             }
             document.getElementById('finalBookBtn').disabled = true; 
             document.getElementById('bookingLoader').classList.remove('hidden');
@@ -1394,71 +941,80 @@
                     timestamp: serverTimestamp(), 
                     status: 'requested' 
                 }); 
-                showToast("Your 1-on-1 ADN preparation session was successfully requested. Direct email updates are on the way!", "Session Requested", "success");
-                setTimeout(() => {
-                    location.reload(); 
-                }, 2500);
-            }
-            catch (e) { 
-                showToast("Authentication/Connection Failure. Try again or check network properties.", "Request Failed", "error"); 
+                window.showToast("Your session has been requested successfully!", "success");
+                setTimeout(() => location.reload(), 2000);
+            } catch (e) { 
+                window.showToast("Booking failed. Please try again.", "error"); 
                 document.getElementById('finalBookBtn').disabled = false; 
                 document.getElementById('bookingLoader').classList.add('hidden');
             }
         };
 
         window.toggleAuthOverlay = () => document.getElementById('authOverlay').classList.toggle('hidden');
+        
         window.changeMonth = (dir) => { 
             currentViewMonth += dir; 
-            if(currentViewMonth>11){currentViewMonth=0;currentViewYear++} 
-            if(currentViewMonth<0){currentViewMonth=11;currentViewYear--} 
+            if (currentViewMonth > 11) {
+                currentViewMonth = 0;
+                currentViewYear++;
+            } 
+            if (currentViewMonth < 0) {
+                currentViewMonth = 11;
+                currentViewYear--;
+            } 
             generateCalendar(); 
         };
+        
         window.nextStep = () => { 
-            if(selectedDate && selectedTime){ 
+            if (selectedDate && selectedTime) { 
                 document.getElementById('step-1').classList.add('hidden'); 
                 document.getElementById('step-2').classList.remove('hidden'); 
             } else {
-                showToast("Please choose a date and pick an available time slot.", "Incomplete selection", "error");
+                window.showToast("Please select a date and an available time slot.", "error");
             }
         };
+        
         window.prevStep = () => { 
             document.getElementById('step-2').classList.add('hidden'); 
             document.getElementById('step-1').classList.remove('hidden'); 
         };
-        window.handleGoogleSignIn = () => signInWithPopup(auth, new GoogleAuthProvider()).then(() => {
-            document.getElementById('authOverlay').classList.add('hidden');
-            showToast("Successfully authenticated via Google services.", "Logged In", "success");
-        }).catch(err => {
-            showToast("Failed to authenticate with Google: " + err.message, "Sign In Error", "error");
-        });
+        
+        window.handleGoogleSignIn = () => {
+            signInWithPopup(auth, new GoogleAuthProvider())
+                .then(() => {
+                    document.getElementById('authOverlay').classList.add('hidden');
+                    window.showToast("Successfully logged in with Google!", "success");
+                })
+                .catch((err) => {
+                    window.showToast("Google Authentication failed.", "error");
+                });
+        };
         
         window.handleEmailAuth = async () => {
-            const e = document.getElementById('authEmail').value, p = document.getElementById('authPassword').value; 
+            const e = document.getElementById('authEmail').value.trim();
+            const p = document.getElementById('authPassword').value.trim(); 
             if (!e || !p) {
-                return showToast("Please input an email address and password to sign in.", "Fields Missing", "error");
+                window.showToast("Please complete all login fields.", "error");
+                return;
             }
             try { 
                 await signInWithEmailAndPassword(auth, e, p); 
-                showToast("Welcome back to your dashboard portal.", "Access Granted", "success");
+                window.showToast("Welcome back!", "success");
             } catch (err) { 
-                if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+                if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
                     try {
-                        await createUserWithEmailAndPassword(auth, e, p); 
-                        showToast("Your student profile has been created successfully.", "Account Created", "success");
-                    } catch(signupErr) {
-                        showToast(signupErr.message, "Sign Up Failed", "error");
+                        await createUserWithEmailAndPassword(auth, e, p);
+                        window.showToast("New account created. Welcome!", "success");
+                    } catch (createErr) {
+                        window.showToast(createErr.message, "error");
                     }
                 } else { 
-                    showToast(err.message, "Authentication Error", "error"); 
+                    window.showToast(err.message, "error"); 
                 } 
             }
         };
-        window.handleSignOut = () => signOut(auth).then(() => {
-            showToast("You have safely logged out of your session.", "Logged Out", "info");
-            setTimeout(() => {
-                location.reload();
-            }, 1200);
-        });
+        
+        window.handleSignOut = () => signOut(auth).then(() => location.reload());
 
         generateCalendar();
     </script>
