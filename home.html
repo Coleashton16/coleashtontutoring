@@ -83,12 +83,6 @@
             background-position: 0 0, 10px 10px;
             opacity: 0.03;
         }
-        .gradient-card {
-            background: linear-gradient(135deg, #111827 0%, #0f172a 100%);
-        }
-        .glow-teal:hover {
-            box-shadow: 0 10px 30px -10px rgba(13, 148, 136, 0.4);
-        }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -103,9 +97,116 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+
+        /* Tour Spotlight animations */
+        .tour-spotlight-active {
+            box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.75);
+            z-index: 1000;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-teal-100 selection:text-teal-900">
+
+    <!-- Onboarding Guided Tour Container (Appears dynamically for new users) -->
+    <div id="tourOverlay" class="fixed inset-0 z-[240] bg-slate-900/60 backdrop-blur-sm hidden flex flex-col items-center justify-center p-4 transition-all duration-300">
+        <!-- Guidelines/Honor Agreement Step Card -->
+        <div id="tourGuidelinesCard" class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh] hidden">
+            <!-- Card Header -->
+            <div class="bg-gradient-to-r from-teal-700 to-slate-900 p-8 text-white relative flex-shrink-0">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 rounded-full bg-teal-500/10 blur-xl"></div>
+                <div class="relative z-10 flex items-center gap-4">
+                    <div class="p-3 bg-white/10 rounded-2xl border border-white/20">
+                        <i data-lucide="shield-alert" class="w-8 h-8 text-teal-300"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-black brand-font tracking-tight">Academic Integrity & Guidelines</h3>
+                        <p class="text-xs text-teal-200 mt-1">Please agree to our mentorship principles to proceed</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Guideline Content Scroll -->
+            <div class="flex-1 overflow-y-auto p-8 space-y-6 bg-slate-50">
+                <p class="text-sm text-slate-600 leading-relaxed font-medium">
+                    Welcome to the Ashton Nursing Mentor Portal! Before we walk you through your new student dashboard, please review and accept our professional code of conduct:
+                </p>
+
+                <!-- Guideline Rules Grid -->
+                <div class="space-y-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/60 flex gap-4 items-start shadow-sm">
+                        <div class="p-2 bg-rose-50 text-rose-600 rounded-xl flex-shrink-0">
+                            <i data-lucide="ban" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">Strict Anti-Cheating Honor Code</h4>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                Mentorship is intended for conceptual support and clinical preparation. You are strictly forbidden from sharing active exams, requesting live quiz assistance, or utilizing materials to bypass educational standards.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/60 flex gap-4 items-start shadow-sm">
+                        <div class="p-2 bg-amber-50 text-amber-600 rounded-xl flex-shrink-0">
+                            <i data-lucide="copyright" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">Intellectual Property & Copyrights</h4>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                All study guides, practice calculations, path charts, and feedback notes distributed by Cole Ashton are proprietary intellectual property. Distribution, resale, or unauthorized sharing of these files is prohibited.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/60 flex gap-4 items-start shadow-sm">
+                        <div class="p-2 bg-teal-50 text-teal-600 rounded-xl flex-shrink-0">
+                            <i data-lucide="calendar-x" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">Attendance & No-Show Regulations</h4>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                Missed sessions prevent other students from scheduling guidance. Standard attendance dictates cancellations must be submitted 24 hours prior. Unexcused consecutive no-shows can result in direct account restriction.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guideline Footer -->
+            <div class="p-6 bg-white border-t border-slate-100 flex justify-end gap-3 flex-shrink-0">
+                <button onclick="handleSignOut()" class="px-5 py-3 border border-slate-200 text-slate-500 hover:bg-slate-50 font-bold rounded-xl transition text-sm">Decline & Exit</button>
+                <button onclick="advanceTour()" class="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-extrabold rounded-xl transition text-sm flex items-center gap-2 shadow-lg shadow-teal-600/15">
+                    Accept & Begin Tour <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Interactive Tour Indicator Tooltip Block -->
+        <div id="tourPointerCard" class="absolute z-[1100] bg-white text-slate-800 p-6 rounded-3xl border border-teal-500/30 max-w-sm w-full shadow-2xl pointer-events-auto hidden transform transition-all duration-300">
+            <!-- Visual Pointer arrow -->
+            <div id="tourPointerArrow" class="absolute w-4 h-4 bg-white rotate-45 border-t border-l border-teal-500/30"></div>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span class="text-[10px] font-bold text-teal-600 uppercase tracking-widest flex items-center gap-1">
+                        <i data-lucide="compass" class="w-3.5 h-3.5 animate-spin"></i> Interactive Walkthrough
+                    </span>
+                    <span id="tourStepBadge" class="text-[10px] font-extrabold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Step 2 of 4</span>
+                </div>
+                
+                <div>
+                    <h4 id="tourStepTitle" class="font-black text-slate-900 text-base brand-font">Title Here</h4>
+                    <p id="tourStepDesc" class="text-xs text-slate-600 leading-relaxed mt-1">Instructions here</p>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button onclick="skipTour()" class="text-xs font-bold text-slate-400 hover:text-slate-600 transition">Skip tour</button>
+                    <button id="tourNextBtn" onclick="advanceTour()" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-black rounded-xl shadow-md transition flex items-center gap-1.5">
+                        Got it! <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Global Custom Toast Notification Element -->
     <div id="customToast" class="fixed top-20 right-6 z-[300] max-w-sm w-full bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 flex items-start gap-3">
@@ -155,6 +256,7 @@
             <div class="flex items-center gap-4">
                 <div class="hidden md:flex items-center gap-8 font-semibold text-slate-600 mr-4">
                     <a href="#services" class="hover:text-teal-600 transition text-sm">Mentoring Areas</a>
+                    <a id="navAboutLink" href="#about-me" class="hover:text-teal-600 transition text-sm">About Cole</a>
                     <a href="#schedule" class="hover:text-teal-600 transition text-sm">Book Session</a>
                 </div>
                 
@@ -183,10 +285,10 @@
     </nav>
 
     <!-- Hero / Promotional Header (Adapts smoothly for logged-in and logged-out views) -->
-    <header class="relative overflow-hidden pt-12 pb-20 px-4 max-w-6xl mx-auto">
+    <header id="marketingHero" class="relative overflow-hidden pt-12 pb-20 px-4 max-w-6xl mx-auto">
         <div class="absolute inset-0 medical-pattern rounded-[3rem]"></div>
         
-        <div id="marketingHero" class="relative z-10 text-center max-w-4xl mx-auto">
+        <div class="relative z-10 text-center max-w-4xl mx-auto">
             <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 mb-6 leading-tight tracking-tight brand-font">
                 Master Clinical Reasonings & <br>
                 <span class="bg-gradient-to-r from-teal-600 to-cyan-500 bg-clip-text text-transparent">Excel in Your ADN Journey</span>
@@ -205,8 +307,68 @@
         </div>
     </header>
 
+    <!-- Public Visitor Meet Cole Section (Only visible when user is not logged in) -->
+    <section id="aboutMeSection" class="py-16 px-4 max-w-6xl mx-auto relative">
+        <div class="bg-white border border-slate-200/80 rounded-[2.5rem] shadow-xl overflow-hidden p-8 md:p-12">
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                <!-- Left: Profile Image Box -->
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative group">
+                        <!-- Decorative Medical Glow Background -->
+                        <div class="absolute -inset-4 bg-gradient-to-tr from-teal-500 to-cyan-500 rounded-[2.5rem] opacity-20 blur-xl transition group-hover:opacity-30"></div>
+                        
+                        <!-- Premium Profile Image Wrapper -->
+                        <div class="relative bg-white p-3 rounded-[2.25rem] border border-slate-200/60 shadow-lg">
+                            <img src="profileimage.jpg" alt="Cole Ashton" onerror="this.src='https://placehold.co/400x500/0d9488/ffffff?text=Cole+Ashton'" class="w-72 h-96 md:w-80 md:h-[420px] rounded-[1.75rem] object-cover shadow-inner bg-slate-100">
+                            
+                            <!-- Static overlay credentials badge -->
+                            <div class="absolute -bottom-4 right-4 bg-slate-900 text-white py-2.5 px-4 rounded-xl shadow-lg border border-slate-800 text-xs font-bold tracking-wide">
+                                Cole Ashton, ADN Mentor
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Credentials and Bio Description -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 text-xs font-bold text-teal-700 bg-teal-50 rounded-full border border-teal-100 uppercase tracking-wider">
+                        Meet Your Educator
+                    </div>
+                    
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-950 brand-font leading-tight">
+                        Compassionate Clinical Guidance Built Specifically for ADN Scholars
+                    </h2>
+                    
+                    <p class="text-slate-600 text-sm md:text-base leading-relaxed font-medium">
+                        Welcome! I am <strong class="text-slate-900 font-bold">Cole Ashton</strong>, your specialist academic coach. As an educator specializing in Associate Degree in Nursing (ADN) subjects, my mission is to simplify complex pathophysiological concepts, streamline clinical math calculations, and rebuild exam taking confidence.
+                    </p>
+                    
+                    <p class="text-slate-600 text-xs md:text-sm leading-relaxed">
+                        Nursing school can feel overwhelming, but mastering clinical reasoning doesn't have to be. Through structured, custom study paths and exam-taking blueprints, we will turn textbook complexity into clear, actionable nursing knowledge.
+                    </p>
+
+                    <!-- Stats / Trust Indicators Grid -->
+                    <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
+                        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/40 text-center">
+                            <span class="block text-xl md:text-2xl font-black text-teal-600">98%</span>
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pass Rate</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/40 text-center">
+                            <span class="block text-xl md:text-2xl font-black text-teal-600">1,000+</span>
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Hours Mentored</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/40 text-center">
+                            <span class="block text-xl md:text-2xl font-black text-teal-600">1-on-1</span>
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Focused Care</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- LOGGED IN STUDENT HUB SECTION (Displays automatically when logged in) -->
-    <section id="studentPortalDashboardSection" class="hidden py-8 px-4 max-w-6xl mx-auto">
+    <section id="studentPortalDashboardSection" class="hidden py-8 px-4 max-w-6xl mx-auto relative">
         <div class="bg-white border border-slate-200 rounded-[2.5rem] shadow-xl overflow-hidden mb-12">
             <!-- Header bar with Personalized Portal Welcome -->
             <div class="bg-slate-900 text-white p-8 relative overflow-hidden">
@@ -255,14 +417,13 @@
                         </div>
                     </div>
 
-                    <!-- RIGHT: Quick Mentor Card & Direct Action Workspace -->
+                    <!-- RIGHT: Quick Mentor Card (USES PROFILE IMAGE) -->
                     <div class="space-y-6">
                         <div class="bg-white border border-slate-200/80 p-6 rounded-3xl shadow-sm">
                             <div class="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100">
                                 <div class="relative">
-                                    <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-teal-600 font-bold border border-slate-200">
-                                        <i data-lucide="user-check" class="w-6 h-6"></i>
-                                    </div>
+                                    <!-- Replaced icon with profile image as requested -->
+                                    <img src="profileimage.jpg" alt="Cole Ashton" onerror="this.src='https://placehold.co/100x100/0d9488/ffffff?text=Cole'" class="w-12 h-12 rounded-2xl object-cover border border-slate-200 shadow-md">
                                     <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
                                 </div>
                                 <div>
@@ -402,7 +563,7 @@
                     
                     <div class="relative z-10">
                         <div class="flex items-center gap-3.5 mb-10 pb-6 border-b border-slate-800">
-                            <!-- Custom Fallback Avatar Image -->
+                            <!-- Custom Fallback Avatar Image (Cole Ashton) -->
                             <img src="profileimage.jpg" alt="Cole Ashton" onerror="this.src='https://placehold.co/100x100/0d9488/ffffff?text=Cole'" class="w-14 h-14 rounded-2xl object-cover border border-slate-700 shadow-md">
                             <div>
                                 <p class="font-bold brand-font text-lg text-white">Cole Ashton</p>
@@ -619,15 +780,40 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Keep current Firebase and firestorm logic 100% same
+        // Keep current Firebase and firestore logic 100% same
         const firebaseConfig = { apiKey: "AIzaSyDRLarhK20JltsckgrZRVJBDt4A4FTkUSk", authDomain: "coleashtontut.firebaseapp.com", projectId: "coleashtontut", storageBucket: "coleashtontut.firebasestorage.app", messagingSenderId: "277509432126", appId: "1:277509432126:web:08c3221cbf3d1336a3c26f" };
         const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), appId = "coleashtontut";
 
         let currentUser = null, selectedDate = null, selectedTime = null, currentViewMonth = new Date().getMonth(), currentViewYear = new Date().getFullYear();
         let adminSettings = { weeklySchedule: {}, blackoutDates: [], specificDateSlots: {} }, userSessions = [], chatMessagesLocal = [];
         let currentAnnouncementTime = null;
+
+        // Onboarding Tour state management
+        let activeTourStep = 0;
+        const tourSteps = [
+            {
+                title: "Academic Policy Agreement",
+                desc: "Welcome! To maintain strict guidelines, please acknowledge our Honor Code and attendance agreement to activate your dashboard access.",
+                target: "GUIDELINES"
+            },
+            {
+                title: "Live Student Hub",
+                desc: "This dashboard displays active, requested, and past sessions in real-time. Check mentor status values and view interactive receipt copies easily.",
+                target: "#studentPortalDashboardSection"
+            },
+            {
+                title: "Interactive Scheduler",
+                desc: "Ready to study? Pick open dates on our calendar, match empty times, list current subjects, and add notes to prepare for future exams.",
+                target: "#schedule"
+            },
+            {
+                title: "Cole's Messenger Assistance",
+                desc: "Have quick questions between review sessions? Click this floating icon to chat with Cole directly and review critical calculations.",
+                target: "#chatContainer"
+            }
+        ];
 
         lucide.createIcons();
 
@@ -742,7 +928,9 @@
             
             // Toggle dashboard visibility inside portal
             const marketingHero = document.getElementById('marketingHero');
+            const aboutMeSection = document.getElementById('aboutMeSection');
             const studentPortalSec = document.getElementById('studentPortalDashboardSection');
+            const navAboutLink = document.getElementById('navAboutLink');
             
             if (isLogged) {
                 document.getElementById('authOverlay').classList.add('hidden');
@@ -755,14 +943,152 @@
                 document.getElementById('userAvatar').innerText = initials;
 
                 marketingHero.classList.add('hidden');
+                aboutMeSection.classList.add('hidden'); // Hide the about me section when logged in
+                if (navAboutLink) navAboutLink.classList.add('hidden'); // Hide from header menu
                 studentPortalSec.classList.remove('hidden');
                 
                 initUserData();
+                checkOnboardingStatus();
             } else {
                 marketingHero.classList.remove('hidden');
+                aboutMeSection.classList.remove('hidden'); // Show when visitor is checking you out
+                if (navAboutLink) navAboutLink.classList.remove('hidden');
                 studentPortalSec.classList.add('hidden');
+                // Ensure tour overlays are hidden on logout
+                document.getElementById('tourOverlay').classList.add('hidden');
             }
         });
+
+        // Check if user needs the guided onboarding tour
+        async function checkOnboardingStatus() {
+            if (!currentUser) return;
+            const onboardingRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'onboarding');
+            try {
+                const onboardingSnap = await getDoc(onboardingRef);
+                if (!onboardingSnap.exists() || !onboardingSnap.data().completed) {
+                    startOnboardingTour();
+                }
+            } catch (err) {
+                console.error("Failed to fetch onboarding metadata, using fallback system", err);
+                // Fail-safe: assume they completed if permission errors occur
+            }
+        }
+
+        // Initialize onboarding system
+        function startOnboardingTour() {
+            activeTourStep = 0;
+            document.getElementById('tourOverlay').classList.remove('hidden');
+            renderActiveTourStep();
+        }
+
+        // Render current tour pointers and highlight targets dynamically
+        function renderActiveTourStep() {
+            const step = tourSteps[activeTourStep];
+            
+            // Clean up any old spotlights
+            document.querySelectorAll('.tour-spotlight-active').forEach(el => {
+                el.classList.remove('tour-spotlight-active');
+            });
+
+            const guidesCard = document.getElementById('tourGuidelinesCard');
+            const pointerCard = document.getElementById('tourPointerCard');
+
+            if (step.target === 'GUIDELINES') {
+                pointerCard.classList.add('hidden');
+                guidesCard.classList.remove('hidden');
+            } else {
+                guidesCard.classList.add('hidden');
+                pointerCard.classList.remove('hidden');
+
+                // Set step badge details
+                document.getElementById('tourStepBadge').innerText = `Step ${activeTourStep + 1} of ${tourSteps.length}`;
+                document.getElementById('tourStepTitle').innerText = step.title;
+                document.getElementById('tourStepDesc').innerText = step.desc;
+
+                // Configure next button texts
+                const isLast = (activeTourStep === tourSteps.length - 1);
+                document.getElementById('tourNextBtn').innerHTML = isLast ? 
+                    `Finish Setup <i data-lucide="check" class="w-3.5 h-3.5"></i>` : 
+                    `Next Section <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`;
+                lucide.createIcons();
+
+                // Dynamic spotlight positioning
+                const targetElement = document.querySelector(step.target);
+                if (targetElement) {
+                    // Smoothly scroll element to center
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Add spotlight highlighting styles
+                    targetElement.classList.add('tour-spotlight-active');
+
+                    // Calculate positioning coordinates
+                    setTimeout(() => {
+                        const rect = targetElement.getBoundingClientRect();
+                        const cardWidth = 384; // max-w-sm tailwind width in px
+                        
+                        // Default position offset above target
+                        let top = (rect.top + window.scrollY) - 210;
+                        let left = (rect.left + window.scrollX) + (rect.width / 2) - (cardWidth / 2);
+                        
+                        // Prevent left boundary clipping
+                        if (left < 16) left = 16;
+                        // Prevent right clipping
+                        if (left + cardWidth > window.innerWidth - 16) {
+                            left = window.innerWidth - cardWidth - 16;
+                        }
+
+                        // Configure pointer card values
+                        pointerCard.style.top = `${top}px`;
+                        pointerCard.style.left = `${left}px`;
+                        
+                        // Place helper pointing arrow dynamically
+                        const arrow = document.getElementById('tourPointerArrow');
+                        arrow.style.bottom = "-8px";
+                        arrow.style.top = "auto";
+                        arrow.style.left = `${(rect.left + window.scrollX + (rect.width / 2)) - left - 8}px`;
+                        arrow.style.borderRightWidth = "1px";
+                        arrow.style.borderBottomWidth = "1px";
+                        arrow.style.borderLeftWidth = "0px";
+                        arrow.style.borderTopWidth = "0px";
+                    }, 500);
+                } else {
+                    // Center fallback if elements are hidden
+                    pointerCard.style.top = "50%";
+                    pointerCard.style.left = "50%";
+                    pointerCard.style.transform = "translate(-50%, -50%)";
+                    document.getElementById('tourPointerArrow').classList.add('hidden');
+                }
+            }
+        }
+
+        // Advance to next tour state or save progress
+        window.advanceTour = async () => {
+            activeTourStep++;
+            if (activeTourStep < tourSteps.length) {
+                renderActiveTourStep();
+            } else {
+                await skipTour(); // Complete tour sequence
+            }
+        }
+
+        // Skip onboarding and save metadata state securely (RULE 1 compliant path)
+        window.skipTour = async () => {
+            // Remove target spotlights
+            document.querySelectorAll('.tour-spotlight-active').forEach(el => {
+                el.classList.remove('tour-spotlight-active');
+            });
+            document.getElementById('tourOverlay').classList.add('hidden');
+            
+            if (currentUser) {
+                const onboardingRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'onboarding');
+                try {
+                    await setDoc(onboardingRef, { completed: true, completedAt: serverTimestamp() });
+                    showToast("Guidelines agreed and system tutorial complete. Welcome to Ashton Nursing Mentorship!", "Portal Activated", "success");
+                } catch (err) {
+                    console.error("Failed to commit onboarding status to database", err);
+                }
+            }
+        }
 
         function initUserData() {
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'bookings')), (snapshot) => {
